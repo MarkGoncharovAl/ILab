@@ -52,5 +52,3 @@ if (TEST)
     GTest::Main
   )
 endif(TEST)
-
-install (TARGETS e2e_tests DESTINATION ../build)
