@@ -1,0 +1,14 @@
+Final hits: 0 and final time: 2ms
+Final hits: 4 and final time: 2ms
+Final hits: 5 and final time: 2ms
+Final hits: 3 and final time: 3ms
+Final hits: 12 and final time: 3ms
+Final hits: 16 and final time: 3ms
+Final hits: 19 and final time: 3ms
+Final hits: 25 and final time: 3ms
+Final hits: 24 and final time: 3ms
+Final hits: 26 and final time: 3ms
+Final hits: 30 and final time: 3ms
+Final hits: 33 and final time: 2ms
+Final hits: 37 and final time: 1ms
+Final hits: 995 and final time: 248ms

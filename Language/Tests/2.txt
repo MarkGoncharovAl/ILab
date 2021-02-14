@@ -1,0 +1,5 @@
+var = 5;
+print var + 2;
+name = 6;
+var2 = name + 1;
+print var2;

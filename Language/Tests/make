@@ -1,0 +1,37 @@
+cp ../build/main ../Tests/main
+cd ../Tests
+
+echo ""
+echo "1 test: sequency"
+./main < 1.txt
+echo "waited 7, 9, 1, 2"
+echo "1 test ended!"
+
+echo ""
+echo "2 test: variables"
+./main < 2.txt
+echo ""
+echo "waited 7 7"
+echo "2 test ended!"
+
+echo ""
+echo "3 test: while"
+./main < 3.txt
+echo ""
+echo "waited 0 1 2"
+echo "3 test ended!"
+
+echo ""
+echo "4 test: "
+./main < 4.txt
+echo "4 test ended!"
+
+echo ""
+echo "5 test: "
+./main < 5.txt
+echo "5 test ended!"
+
+echo ""
+echo "6 test: "
+./main < 6.txt
+echo "6 test ended!"
