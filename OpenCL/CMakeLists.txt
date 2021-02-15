@@ -13,9 +13,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 find_package(OpenCL REQUIRED)
 find_package(GTest REQUIRED)
 
-option(MAIN ON)
-option(TEST OFF)
-option(E2E OFF)
+option(MAIN "adding main" ON)
+option(TEST "adding google tests" OFF)
+option(E2E "adding full_tests" OFF)
 
 add_subdirectory(BSort)
 add_subdirectory(Common_libs/Errors)
@@ -23,7 +23,7 @@ add_subdirectory(Common_libs/Random)
 add_subdirectory(Common_libs/Time)
 
 if (MAIN)
-    message("Building main)
+    message("Building main")
     add_executable(main main.cpp)
     target_link_libraries (
         main    
@@ -54,7 +54,6 @@ if (TEST)
         GTest::Main
     )
 endif(TEST)
-
 
 if (E2E)
     message("Building E2E")
