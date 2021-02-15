@@ -7,7 +7,7 @@
 int main()
 {
     constexpr size_t size = 9;
-    constexpr size_t count = 2000;
+    constexpr size_t count = 1000000;
 
     std::array<std::ofstream, size> files = {
         std::ofstream{"1.txt", std::ios_base::out},

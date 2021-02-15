@@ -60,7 +60,7 @@ int main()
 
 std::vector<int> CreateTest()
 {
-    constexpr size_t size = 10000;
+    constexpr size_t size = 100000;
     MLib::Random rand{0, 2000};
 
     std::vector<int> out;

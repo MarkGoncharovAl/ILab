@@ -56,47 +56,39 @@ void clM::Data_t::BSort(std::vector<int> &data, Sort sort)
 {
     size_t old_size = clMFunc::PrepareData(data, sort);
     size_t new_size = data.size();
+    unsigned numStages = clMFunc::GetNumStages(new_size);
 
     cl::Buffer buffer(context_, CL_MEM_READ_WRITE, new_size * sizeof(int));
     queue_.enqueueWriteBuffer(buffer, CL_TRUE, 0, new_size * sizeof(int), data.data());
 
     cl::NDRange global_size = new_size / 2;
-    unsigned numStages = std::round(std::log2(new_size));
-    cl::NDRange local_size = std::min(new_size / 2 , device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>());
+    cl::NDRange local_size = std::min(new_size / 2, device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>());
+    unsigned curStages = std::floor(std::log2(*local_size));
 
+    MLib::Time time;
+    kernel_.setArg(0, buffer);
+    kernel_.setArg(1, curStages);
+    kernel_.setArg(2, static_cast<unsigned>(sort));
+    RunEvent(local_size, global_size);
+
+    kernel_ = cl::Kernel(program_, "BSort_origin");
+    for (; curStages < numStages; ++curStages)
     {
-        MLib::Time time;
-        kernel_.setArg(0, buffer);
-        kernel_.setArg(1, numStages);
-        kernel_.setArg(2, static_cast<unsigned>(sort));
+        for (size_t stage_pass = 0; stage_pass < curStages + 1; ++stage_pass)
+        {
+            kernel_.setArg(0, buffer);
+            kernel_.setArg(1, static_cast<unsigned>(curStages));
+            kernel_.setArg(2, static_cast<unsigned>(stage_pass));
+            kernel_.setArg(3, static_cast<unsigned>(sort));
 
-        RunEvent(local_size, global_size);
-        auto time_found = time.Get().count();
-        std::cout << MLib::Color::Purple << "Time passed using GPU1: " << time_found << " mc"
-                  << std::endl
-                  << MLib::Color::Reset;
+            RunEvent(local_size, global_size);
+        }
     }
-    // {
-    //     /*second part*/
-    //     MLib::Time time;
-    //     kernel_ = cl::Kernel(program_, "BSort_origin");
-    //     for (; stage < numStages; ++stage)
-    //     {
-    //         for (std::size_t stage_pass = 0; stage_pass < stage + 1; ++stage_pass)
-    //         {
-    //             kernel_.setArg(0, buffer);
-    //             kernel_.setArg(1, static_cast<unsigned>(stage));
-    //             kernel_.setArg(2, static_cast<unsigned>(stage_pass));
-    //             kernel_.setArg(3, static_cast<unsigned>(sort));
 
-    //             RunEvent(local_size, global_size);
-    //         }
-    //     }
-    //     auto time_found = time.Get().count();
-    //     std::cout << MLib::Color::Purple << "Time passed using GPU2: " << time_found << " mc"
-    //               << std::endl
-    //               << MLib::Color::Reset;
-    // }
+    auto time_found = time.Get().count();
+    std::cout << MLib::Color::Purple << "Time passed using GPU2: " << time_found << " mc"
+              << std::endl
+              << MLib::Color::Reset;
 
     auto map_data = (int *)queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_size * sizeof(int));
     for (size_t i = 0; i < new_size; i++)
@@ -131,6 +123,11 @@ cl::Device clMFunc::FindDevice(const std::vector<cl::Device> &devices)
     }
 
     throw std::runtime_error("Can't find device");
+}
+
+unsigned clMFunc::GetNumStages(size_t size)
+{
+    return std::ceil(std::log2(size));
 }
 
 size_t clMFunc::PrepareData(std::vector<int> &data, clM::Sort sort)

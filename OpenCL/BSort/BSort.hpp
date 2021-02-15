@@ -45,7 +45,7 @@ namespace clMFunc
 {
     cl::Device FindDevice(const std::vector<cl::Device>& devices);
     std::string ReadFromFile(const std::string& file);
-    unsigned int GetNumStages(size_t num, const cl::Device& device);
+    unsigned int GetNumStages(size_t num);
 
     // returns old_size`
     size_t PrepareData(std::vector<int>& data, clM::Sort sort);
