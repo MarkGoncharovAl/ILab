@@ -57,7 +57,7 @@ clM::Data_t::Data_t()
     context_ = cl::Context{device_};
     queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
 
-    std::string data_file = clMFunc::ReadFromFile("../BSort.cl");
+    std::string data_file = clMFunc::ReadFromFile("../BSort/BSort.cl");
     program_ = cl::Program(context_, data_file, true);
 
     kernel_ = cl::Kernel(program_, "BSort");
