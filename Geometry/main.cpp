@@ -1,21 +1,33 @@
 #include <iostream>
-#include "Geometry.h"
+#include "Base/Geometry.hpp"
 
-int main()
+int main ()
 {
-	geometry::Point_t<3> point1 = { 0, 0, 2 };
-	geometry::Point_t<3> point2 = { 1, 1, 0.345 };
-	geometry::Point_t<3> point3 = { 0.5432, 65, 1};
-	
+	size_t count = 0;
+	std::cin >> count;
+	if (std::cin.fail ())
+		ERROR ("Can't read data properly!");
 
-	geometry::Surface3_t surf(point1, point2, point3);
-	surf.dump(std::cout, "Hah");
-	
-	std::cout << geometry::ScalMult(geometry::Vector_t<3>{point1, point2}, surf.get_normal()) << "\n";
-	std::cout << geometry::ScalMult(geometry::Vector_t<3>{point3, point2}, surf.get_normal()) << "\n";
+	std::vector<MLib::Triangle<double>> trs;
+	trs.reserve (count);
+	for (size_t i = 0; i < count; ++i)
+	{
+		std::array<double , 9> arr;
+		for (double& elem : arr)
+			std::cin >> elem;
+		if (std::cin.fail ())
+			ERROR ("Can't read data properly!");
 
-	std::cout << "NEXT TEST!!!\n\n\n";
+		trs.push_back (std::move (MLib::Triangle { arr }));
 
-	geometry::Vector_t<3> vec = { 1, 2, 3 };
-	std::cout << ScalMult(vec - vec.get_projection_on(surf.get_normal()), surf.get_normal());
+		bool is_found = false;
+		for (size_t j = 0; j < i; ++j)
+		{
+			if (MLib::Intersect(trs[i], trs[j]))
+				is_found = true;
+		}
+
+		if (is_found)
+			std::cout << i << std::endl;
+	}
 }

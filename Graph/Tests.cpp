@@ -60,7 +60,7 @@ TEST(DFS, easy)
 {
     MC::KGraph<> graph{{{0, 1}, {0, 2}}};
     std::cout << graph;
-    auto out = graph.dumpDFS();
+    auto out = graph.DFS_Bip();
     std::vector<int> check = {0, 1, 2};
 
     for (size_t i = 0; i < check.size(); ++i)
@@ -81,7 +81,7 @@ TEST(DFS, ordinary)
     //  |           |
     //  7           8
     MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}, {2, 6}, {3, 7}, {4, 5}, {6, 8}}};
-    auto out = graph.dumpDFS();
+    auto out = graph.DFS_Bip();
 
     std::vector<int> check = {0, 1, 3, 7, 4, 5, 2, 6, 8};
     for (size_t i = 0; i < check.size(); ++i)
@@ -92,7 +92,7 @@ TEST(DFS, is_2_easy_true)
 {
     MC::KGraph<> graph{{{0, 1}, {0, 2}}};
     bool check_b = false;
-    auto out = graph.dumpDFS(&check_b);
+    auto out = graph.DFS_Bip(&check_b);
     ASSERT_EQ(check_b, true);
 
     std::vector<int> check = {0, 1, 2};
@@ -104,7 +104,7 @@ TEST(DFS, is_2_easy_true_2)
 {
     MC::KGraph<> graph{{{-1, 1}}};
     bool check_b = false;
-    auto out = graph.dumpDFS(&check_b);
+    auto out = graph.DFS_Bip(&check_b);
     ASSERT_EQ(check_b, true);
 
     std::vector<int> check = {-1, 1};
@@ -116,7 +116,7 @@ TEST(DFS, is_2_easy_false)
 {
     MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 2}}};
     bool check_b = true;
-    auto out = graph.dumpDFS(&check_b);
+    auto out = graph.DFS_Bip(&check_b);
     ASSERT_EQ(check_b, false);
 }
 
@@ -124,7 +124,7 @@ TEST(DFS, is_2_ord)
 {
     MC::KGraph<> graph{{{0, 1}, {2, 3}, {2, 1}}};
     bool check_b = false;
-    auto out = graph.dumpDFS(&check_b);
+    auto out = graph.DFS_Bip(&check_b);
     ASSERT_EQ(check_b, true);
 }
 
@@ -133,7 +133,7 @@ TEST(DFS, is_2_colors)
     using pair = std::pair<int, typename MC::KGraph<>::Color>;
 
     MC::KGraph<> graph{{{0, 1}, {2, 3}, {2, 1}}};
-    auto out = graph.dumpDFS();
+    auto out = graph.DFS_Bip();
 
     std::vector<typename MC::KGraph<>::Color> check =
         {MC::KGraph<>::Color::Blue, MC::KGraph<>::Color::Red, MC::KGraph<>::Color::Blue, MC::KGraph<>::Color::Red};
@@ -160,7 +160,7 @@ TEST(DFS, is_2_colors_HARD)
                         {3, 6}}};
 
     bool out_check = false;
-    auto out = graph.dumpDFS(&out_check);
+    auto out = graph.DFS_Bip(&out_check);
     ASSERT_EQ(out_check, true);
 
     std::vector<typename MC::KGraph<>::Color> check{10};

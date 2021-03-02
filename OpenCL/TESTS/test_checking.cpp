@@ -5,12 +5,12 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
-#include "../Common_libs/Errors/Errors.hpp"
+#include "../Common_libs/Errors.hpp"
 #include "../Common_libs/Color.hpp"
 #include "../Common_libs/Random/Random.hpp"
 #include "../Common_libs/Time/Time.hpp"
 
-static std::vector<int> CreateTest();
+static std::vector<int> ReadFile(std::ifstream& file);
 static void CompareData(const std::vector<int> &data, const std::vector<int> &data_check);
 
 int main()
@@ -28,9 +28,10 @@ int main()
         std::ifstream{"../TESTS/9.txt"},
     };
 
-    for (size_t i = 0; i < size; ++i)
+    //ifstrteam& - should be read
+    for (std::ifstream& file : files)
     {
-        std::vector<int> data = CreateTest();
+        std::vector<int> data = ReadFile(file);
         std::vector<int> data_check = data;
 
         MLib::Time time;
@@ -58,17 +59,20 @@ int main()
     return 0;
 }
 
-std::vector<int> CreateTest()
+std::vector<int> ReadFile(std::ifstream& file)
 {
-    constexpr size_t size = 100000;
-    MLib::Random rand{0, 2000};
+    size_t count = 0;
+    file >> count;
+    if (!file)
+        throw std::runtime_error("Test can't be created!");
 
-    std::vector<int> out;
-    out.reserve(size);
-
-    for (size_t i = 0; i < size; ++i)
-        out.push_back(rand.get());
-
+    std::vector<int> out(count);
+    
+    for (size_t i = 0; i < count; ++i)
+        file >> out[i];
+    
+    if (!file)
+        throw std::runtime_error("Test can't be created!");
     return out;
 }
 

@@ -9,7 +9,7 @@ namespace MLib
     public:
         Random(int init_start = std::mt19937::min(), int init_end = std::mt19937::max());
 
-        int get();
+        int get() { return dist_(gen_); }
 
     private:
         static std::random_device rd_;

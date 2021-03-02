@@ -35,7 +35,7 @@ TEST(BSort, easy_decr)
 TEST(BSort, big_incr)
 {
     constexpr size_t size = 100;
-    constexpr size_t tests = 100;
+    constexpr size_t tests = 10;
 
     std::vector<int> test;
     test.resize(size);
@@ -57,7 +57,7 @@ TEST(BSort, big_incr)
 TEST(BSort, big_decr)
 {
     constexpr size_t size = 100;
-    constexpr size_t tests = 100;
+    constexpr size_t tests = 10;
 
     std::vector<int> test;
     test.resize(size);

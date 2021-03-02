@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include "../Common_libs/Time/Time.hpp"
-#include "../Common_libs/Errors/Errors.hpp"
+#include "../Common_libs/Errors.hpp"
 #include "../Common_libs/Color.hpp"
 
 void clM::CheckReturnError(cl_int err, const char *file, size_t line)
@@ -39,9 +39,20 @@ void clM::BSort(std::vector<int> &data, Sort sort /* = Sort::Incr*/)
 
 clM::Data_t::Data_t()
 {
-    std::vector<cl::Device> devices;
-    cl::Platform{}.getDevices(CL_DEVICE_TYPE_ALL, &devices);
-    device_ = clMFunc::FindDevice(devices);
+    //Checking every platform
+    std::vector<cl::Platform> platforms;
+    cl::Platform::get(&platforms);
+    if( platforms.size() == 0)
+        throw std::runtime_error("No platforms found. Check OpenCL installation!");
+
+    for (auto&& elem : platforms)
+    {
+        std::vector<cl::Device> devices;
+        elem.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+        //if found device -> goooooo
+        if ((device_ = clMFunc::FindDevice(devices)) != cl::Device{})
+            break;
+    }
 
     context_ = cl::Context{device_};
     queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
@@ -58,19 +69,34 @@ void clM::Data_t::BSort(std::vector<int> &data, Sort sort)
     size_t new_size = data.size();
     unsigned numStages = clMFunc::GetNumStages(new_size);
 
+    //buffer is a global memory in kernel
     cl::Buffer buffer(context_, CL_MEM_READ_WRITE, new_size * sizeof(int));
     queue_.enqueueWriteBuffer(buffer, CL_TRUE, 0, new_size * sizeof(int), data.data());
 
     cl::NDRange global_size = new_size / 2;
+
+    //размер local_size не может превышать размера woek_group
+    //поэтому мы можем сранивать элементы только на этом расстоянии
     cl::NDRange local_size = std::min(new_size / 2, device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>());
-    unsigned curStages = std::floor(std::log2(*local_size));
+    //если global_size > local_size, то оставшиеся стадии проходят отдельно
+    //т.е. вызывается много раз kernel во ВНЕШНЕМ цикле 
+    
+    unsigned curStages = std::log2(*local_size);
 
     MLib::Time time;
     kernel_.setArg(0, buffer);
     kernel_.setArg(1, curStages);
     kernel_.setArg(2, static_cast<unsigned>(sort));
+    
+    //выделяем локальную память, куда будем писать данные
+    //внутри вызова в kernel
+    cl::LocalSpaceArg local = cl::Local(2 * (*local_size) * sizeof(int));
+    kernel_.setArg(3, local);
     RunEvent(local_size, global_size);
 
+    //обрабатываем стадии, для которых размер work_group > local_size
+    //здесь всё медленнее, так как всё время обращаемся только к 
+    //глобальной памяти, часто вызываем дорогую операцию RunEvent
     kernel_ = cl::Kernel(program_, "BSort_origin");
     for (; curStages < numStages; ++curStages)
     {
@@ -90,6 +116,7 @@ void clM::Data_t::BSort(std::vector<int> &data, Sort sort)
               << std::endl
               << MLib::Color::Reset;
 
+    //копируем обратно в исходный массив
     auto map_data = (int *)queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_size * sizeof(int));
     for (size_t i = 0; i < new_size; i++)
         data[i] = map_data[i];
@@ -122,7 +149,8 @@ cl::Device clMFunc::FindDevice(const std::vector<cl::Device> &devices)
             return device;
     }
 
-    throw std::runtime_error("Can't find device");
+    WARNING("Can't find device");
+    return cl::Device{};
 }
 
 unsigned clMFunc::GetNumStages(size_t size)

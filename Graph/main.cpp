@@ -14,11 +14,11 @@ int main()
 
     //graph.dump(std::cout);
     bool is_2 = false;
-    auto checking = graph.dumpDFS(&is_2);
+    auto checking = graph.DFS_Bip(&is_2);
 
     if (!is_2)
     {
-        std::cout << MLib::Color::Bold_Red << "Graph not dicotyledonous!\n";
+        std::cout << "Graph not dicotyledonous!\n";
         return 0;
     }
 
@@ -28,11 +28,11 @@ int main()
 
     for (auto pair : checking)
     {
-        std::cout << MLib::Color::Bold_White << pair.first;
+        std::cout << pair.first;
         if (pair.second == MC::KGraph<>::Color::Blue)
-            std::cout << MLib::Color::Blue << " b ";
+            std::cout << " b ";
         else
-            std::cout << MLib::Color::Red << " r ";
+            std::cout << " r ";
         std::cout << std::endl;
     }
 }

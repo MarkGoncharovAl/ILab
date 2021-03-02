@@ -22,8 +22,7 @@ namespace clM
     //Binary sort
     void BSort(std::vector<int> &arr, Sort sort = Sort::Incr);
 
-    class Data_t final
-    {
+    class Data_t final {
     public:
         Data_t();
         void BSort(std::vector<int> &arr, Sort sort);

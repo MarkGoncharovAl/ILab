@@ -1,0 +1,4 @@
+/home/mark/VS_prog/ILab/Geometry/build/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Geometry/build/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Geometry/build/CMakeFiles/test.dir
+/home/mark/VS_prog/ILab/Geometry/build/CMakeFiles/main.dir

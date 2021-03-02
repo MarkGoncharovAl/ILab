@@ -18,7 +18,6 @@ option(TEST "adding google tests" OFF)
 option(E2E "adding full_tests" OFF)
 
 add_subdirectory(BSort)
-add_subdirectory(Common_libs/Errors)
 add_subdirectory(Common_libs/Random)
 add_subdirectory(Common_libs/Time)
 
@@ -29,8 +28,7 @@ if (MAIN)
         main    
     
         BSort 
-
-        Errors 
+ 
         Time
 
         ${OpenCL_LIBRARY}
@@ -45,7 +43,6 @@ if (TEST)
     
         BSort 
 
-        Errors 
         Random
         Time    
 
@@ -63,7 +60,6 @@ if (E2E)
     
         BSort 
 
-        Errors
         Random 
         Time
 

@@ -26,7 +26,7 @@ int main()
         MC::KGraph<> graph;
         for (auto elem : data)
             graph.AddEdge(elem.first, elem.second);
-        auto data_DFS = graph.dumpDFS();
+        auto data_DFS = graph.DFS_Bip();
         std::sort(data_DFS.begin(), data_DFS.end(),
                   [](const std::pair<int, typename MC::KGraph<>::Color> &lhs, const std::pair<int, typename MC::KGraph<>::Color> &rhs) { return lhs.first < rhs.first; });
 

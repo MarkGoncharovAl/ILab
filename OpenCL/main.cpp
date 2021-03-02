@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
-#include "Common_libs/Errors/Errors.hpp"
+#include "Common_libs/Errors.hpp"
 
 static std::vector<int> ReadData();
 static void WriteData(const std::vector<int> &data);

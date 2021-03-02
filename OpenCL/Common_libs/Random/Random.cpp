@@ -9,7 +9,5 @@ namespace MLib
         : dist_(init_start, init_end)
     {
     }
-
-    int Random::get() { return dist_(gen_); }
-
+    
 } // namespace MLib
