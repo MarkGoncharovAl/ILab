@@ -6,6 +6,8 @@
 #include "../Common_libs/Errors.hpp"
 #include "../Common_libs/Color.hpp"
 
+namespace po = boost::program_options;
+
 void clM::CheckReturnError(cl_int err, const char *file, size_t line)
 {
     switch (err)
@@ -37,6 +39,41 @@ void clM::BSort(std::vector<int> &data, Sort sort /* = Sort::Incr*/)
     Data_t{}.BSort(data, sort);
 }
 
+void clM::BSort(std::vector<int> &data, const cl::Device& device, Sort sort /*= Sort::Incr*/)
+{
+    // при создании Data_t
+    // уже готовятся основные переменные
+    Data_t{device}.BSort(data, sort);
+}
+
+cl::Device clM::GetDevice(int argc, char* argv[])
+{
+    auto&& data = clMFunc::GetDevices();
+    cl::Device out = clMFunc::AnalyseDevices(data, argc, argv);
+
+    if (out == cl::Device{})
+        std::cout << "Sorting wasn't done\nYou should choose device!\n";
+    return out;
+}
+
+clM::Data_t::Data_t(const cl::Device& device)
+{
+    if (device == cl::Device{})
+    {
+        WARNING("Can't create data from cl::Device{}\n");
+        throw std::invalid_argument("bad device!");
+    }
+    device_ = device;
+
+    context_ = cl::Context{device_};
+    queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
+
+    std::string data_file = clMFunc::ReadFromFile("../BSort/BSort.cl");
+    program_ = cl::Program(context_, data_file, true);
+
+    kernel_ = cl::Kernel(program_, "BSort");
+}
+
 clM::Data_t::Data_t()
 {
     //Checking every platform
@@ -45,7 +82,8 @@ clM::Data_t::Data_t()
     if( platforms.size() == 0)
         throw std::runtime_error("No platforms found. Check OpenCL installation!");
 
-    for (auto&& elem : platforms)
+    std::vector<std::pair<cl::Platform, cl::Device>> output;
+    for (auto&& elem : platforms)   
     {
         std::vector<cl::Device> devices;
         elem.getDevices(CL_DEVICE_TYPE_ALL, &devices);
@@ -96,7 +134,7 @@ void clM::Data_t::BSort(std::vector<int> &data, Sort sort)
 
     //обрабатываем стадии, для которых размер work_group > local_size
     //здесь всё медленнее, так как всё время обращаемся только к 
-    //глобальной памяти, часто вызываем дорогую операцию RunEvent
+    //глобальной памяти, часто вызываем дорогую операцию RunEvent (вызов ядра)
     kernel_ = cl::Kernel(program_, "BSort_origin");
     for (; curStages < numStages; ++curStages)
     {
@@ -177,4 +215,88 @@ size_t clMFunc::PrepareData(std::vector<int> &data, clM::Sort sort)
         data.push_back(pushing_num);
 
     return old_size;
+}
+
+
+clMFunc::Devices_t
+clMFunc::GetDevices()
+{
+    //Checking every platform
+    std::vector<cl::Platform> platforms;
+    cl::Platform::get(&platforms);
+    if( platforms.size() == 0)
+        throw std::runtime_error("No platforms found. Check OpenCL installation!");
+
+    std::vector<std::pair<cl::Platform, cl::Device>> output;
+    for (size_t i = 0; i < platforms.size(); ++i)   
+    {
+        std::vector<cl::Device> devices = {};
+        try
+        {
+            platforms[i].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+        }
+        catch (cl::Error &err)
+        {
+            err.what();
+        }
+
+        for (const auto &device : devices)
+        {
+            if (device.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+                output.emplace_back(platforms[i], device);
+        }
+    }
+
+    return output;
+}
+
+cl::Device clMFunc::AnalyseDevices(const Devices_t& devices, int argc, char* argv[])
+{
+    try
+    {
+        po::options_description desc("Allowed options");
+        desc.add_options()
+            ("help", "information about devices")
+            ("device", po::value<int>(), "set device");
+
+        po::variables_map vm;        
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);  
+
+        if (vm.count("help"))
+        {
+            std::cout << desc;
+            std::cout << "\nAvailable devices and platforms!\n";
+            for (size_t i = 0; i < devices.size(); ++i)
+            {
+                std::cout << "Number: " << i << "\n";
+                std::cout << "Platform:\t";
+                std::cout << devices[i].first.getInfo<CL_PLATFORM_NAME>() << "\n";
+                std::cout << "Device:\t\t";
+                std::cout << devices[i].second.getInfo<CL_DEVICE_NAME>() << "\n\n";
+            }
+            return cl::Device{};
+        }
+
+        if (vm.count("device"))
+        {
+            int num = vm["device"].as<int>();
+            std::cout << "\nDevice " << num << " was set:\n";
+            std::cout << "Platform:\t";
+            std::cout << devices[num].first.getInfo<CL_PLATFORM_NAME>() << "\n";
+            std::cout << "Device:\t\t";
+            std::cout << devices[num].second.getInfo<CL_DEVICE_NAME>() << "\n\n";
+            return devices[num].second;
+        }
+
+        //nothing was changed!
+        std::cout << desc << "\n";
+        return cl::Device{};
+
+    }
+    catch (std::exception& err)
+    {
+        WARNING("Mistake in cheking arguments!");
+        throw err;
+    }
 }

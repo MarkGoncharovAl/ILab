@@ -9,13 +9,17 @@
 static std::vector<int> ReadData();
 static void WriteData(const std::vector<int> &data);
 
-int main()
+int main(int argc, char* argv[])
 {
+    cl::Device device = clM::GetDevice(argc, argv);
+    if (device == cl::Device{})
+        return 0;
+
     std::vector<int> data = ReadData();
 
     try
     {
-        clM::BSort(data, clM::Sort::Decr);
+        clM::BSort(data, device, clM::Sort::Decr);
         WriteData(data);
     }
     catch (cl::Error &err)
@@ -54,6 +58,7 @@ std::vector<int> ReadData()
 
 void WriteData(const std::vector<int> &data)
 {
+    std::cout << "\nFinal data:\n";
     for (int elem : data)
     {
         std::cout << elem << '\t';

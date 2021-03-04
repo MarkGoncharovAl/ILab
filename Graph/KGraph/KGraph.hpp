@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -32,9 +33,14 @@ namespace MCGraph
 
     struct Color
     {
+        //USING
+        //--------------------------------------------
+        using type = char;
+
         static constexpr char START_VALUE = -1;
         static constexpr char BLUE = 0;
         static constexpr char RED = 1;
+        //--------------------------------------------
 
         explicit operator bool () const noexcept { return data_ != START_VALUE; }
         bool empty () const noexcept { return data_ == START_VALUE; }
@@ -44,9 +50,12 @@ namespace MCGraph
         //true if color was changed
         bool change_color() noexcept;
         char print () const noexcept;
+        char get_another() const noexcept;
+
+        bool operator == (const Color &that) const noexcept {return data_ == that.data_;}
         
         //DATA
-        char data_ = START_VALUE;
+        type data_ = START_VALUE;
     };
 } // namespace MCGraph
 
@@ -80,6 +89,7 @@ namespace MC
 
         //returns true if bipartite
         bool DFS_Bip ();
+        std::vector<std::pair<int , MCGraph::Color>> GetColors() const;
         /////////////////////////////////////////////////////////////////
 
     private:
@@ -102,7 +112,7 @@ namespace MC
         std::vector<Edge> edges_;
 
         void dumpWFS_Node (int node , int width , std::unordered_map<int , int>& marked_nodes) const;
-        // bool DFS_Bip_Node (int node , std::unordered_map<int , Color>& marked_nodes , std::vector<std::pair<int , Color>>& queue , Color color) const;
+        bool DFS_Bip_Node (int node);
 
         int PairNode (int node) const;
 
@@ -208,7 +218,7 @@ void MC::KGraph<T1 , T2>::AddEdge (int left , int right , T1 data/* = T1()*/)
     {
         names_nodes_.AddInfo_NTO (node_size , left);
         new_left = node_size;
-        nodes_.push_back ({ edge_size, edge_size });
+        nodes_.push_back ({ edge_size, edge_size, MCGraph::Color{} });
         node_size++;
     }
     else
@@ -218,7 +228,7 @@ void MC::KGraph<T1 , T2>::AddEdge (int left , int right , T1 data/* = T1()*/)
     {
         names_nodes_.AddInfo_NTO (node_size , right);
         new_right = node_size;
-        nodes_.push_back ({ edge_size + 1, edge_size + 1 });
+        nodes_.push_back ({ edge_size + 1, edge_size + 1, MCGraph::Color{} });
         node_size++;
     }
     else
@@ -341,58 +351,61 @@ bool MC::KGraph<T1 , T2>::DFS_Bip ()
     if (empty ())
     {
         WARNING ("Tried to get dumpDFS from empty graph!\n");
-        return std::vector<std::pair<int , Color>>{};
+        return true;
+    }
+    if (typeid(T2) != typeid(MCGraph::Color))
+    {
+        WARNING ("Type of node isn't color!");
+        return false;
     }
 
-    //Preparing data
-    std::unordered_map<int , Color> marked_nodes;
-    marked_nodes.insert ({ 0, Color::Blue });
-    std::vector<std::pair<int , Color>> queue;
-    queue.reserve (nodes_.size ());
+    for (Node& node : nodes_)
+        node.data_.data_ = MCGraph::Color::START_VALUE;
 
-    bool is_2_out = dumpDFS_Node (0 , marked_nodes , queue , Color::Red);
-    for (size_t i = 1; i < nodes_.size (); ++i)
-        if (marked_nodes.find (i) == marked_nodes.end ())
-            if (!dumpDFS_Node (i , marked_nodes , queue , Color::Red))
-                is_2_out = false;
+    for (size_t i = 0; i < nodes_.size (); ++i)
+        if (nodes_[i].data_.empty())
+            if (!DFS_Bip_Node (i))
+                return false;
 
-    if (is_2 != nullptr)
-        *is_2 = is_2_out;
-
-    for (auto& pair : queue)
-        pair.first = names_nodes_.GetInfo_NTO (pair.first);
-
-    return queue;
+    return true;
 }
 
-// template <class T1 , class T2>
-// bool MC::KGraph<T1 , T2>::dumpDFS_Node (int node , std::unordered_map<int , Color>& marked_nodes , std::vector<std::pair<int , Color>>& queue , Color color) const
-// {
-//     queue.push_back ({ node, OtherColor (color) });
-//     int cur_pos = nodes_[node].next_;
-//     bool is_2 = true;
+template <class T1 , class T2>
+bool MC::KGraph<T1 , T2>::DFS_Bip_Node (int node) 
+{
+    std::stack<int> considered_nodes;
+    considered_nodes.push(node);
+    nodes_[node].data_.data_ = MCGraph::Color::BLUE;
 
-//     while (cur_pos != END_FIND)
-//     {
-//         int pair = PairNode (cur_pos);
+    while (!considered_nodes.empty())
+    {
+        int cur_node = considered_nodes.top();
+        considered_nodes.pop();
+        MCGraph::Color::type cur_color = nodes_[cur_node].data_.get_another();
 
-//         auto check = marked_nodes.insert ({ pair, color });
-//         if (check.second)
-//         {
-//             if (!DFS_Bip_Node (pair , marked_nodes , queue , OtherColor (color))) //element was pushed
-//                 is_2 = false;
-//         }
-//         else if (check.first->second != color) //element was already inserted
-//         {
-//             //std::cout << "Color: " << names_nodes_.GetInfo_NTO(check.first->first) << std::endl;
-//             is_2 = false;
-//         }
+        int cur_pos = nodes_[cur_node].next_; 
 
-//         cur_pos = edges_[cur_pos].next_;
-//     }
+        while (cur_pos != END_FIND)
+        {
+            int pair = PairNode (cur_pos);
+            MCGraph::Color& checking = nodes_[pair].data_;
+            if (checking.empty())
+            {
+                checking.data_ = cur_color;
+                considered_nodes.push(pair);
+            }
+            else if (checking.data_ != cur_color) //element was already inserted
+            {
+                //std::cout << "Color: " << names_nodes_.GetInfo_NTO(check.first->first) << std::endl;
+                return false;
+            }
 
-//     return is_2;
-// }
+            cur_pos = edges_[cur_pos].next_;
+        }
+    }
+
+    return true;
+}
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 //?DFS
@@ -407,5 +420,18 @@ template <class T1 , class T2>
 std::ostream& operator<<(std::ostream& out , const MC::KGraph<T1 , T2>& graph)
 {
     graph.dump (out);
+    return out;
+}
+
+template <class T1 , class T2>
+std::vector<std::pair<int , MCGraph::Color>> 
+MC::KGraph<T1 , T2>::GetColors() const
+{
+    std::vector<std::pair<int , MCGraph::Color>> out;
+    out.reserve(nodes_.size ());
+
+    for (size_t i = 0; i < nodes_.size (); ++i)
+        out.emplace_back(names_nodes_.GetInfo_NTO(i), nodes_[i].data_);
+    
     return out;
 }

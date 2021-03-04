@@ -8,10 +8,11 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O0") 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
 
 find_package(OpenCL REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 option(MAIN "adding main" ON)
 option(TEST "adding google tests" OFF)
@@ -32,6 +33,7 @@ if (MAIN)
         Time
 
         ${OpenCL_LIBRARY}
+        Boost::program_options
     )
 endif(MAIN)
 
@@ -49,6 +51,7 @@ if (TEST)
         ${OpenCL_LIBRARY}
         GTest::GTest 
         GTest::Main
+        Boost::program_options
     )
 endif(TEST)
 
@@ -64,5 +67,6 @@ if (E2E)
         Time
 
         ${OpenCL_LIBRARY}
+        Boost::program_options
     )
 endif(E2E)

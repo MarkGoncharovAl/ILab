@@ -12,29 +12,27 @@ int main()
     for (auto elem : data)
         graph.AddEdge(std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
 
-    //graph.dump(std::cout);
-    bool is_2 = false;
-    auto checking = graph.DFS_Bip(&is_2);
-
-    if (!is_2)
+    //graph.dump(std::cout)
+    if (!graph.DFS_Bip())
     {
         std::cout << "Graph not dicotyledonous!\n";
         return 0;
     }
 
     //is_2 == true
+    auto checking = graph.GetColors();
     std::sort(checking.begin(), checking.end(),
-              [](const std::pair<int, MC::KGraph<>::Color> &lhs, const std::pair<int, MC::KGraph<>::Color> &rhs) { return lhs.first < rhs.first; });
+              [](const std::pair<int, MCGraph::Color> &lhs, const std::pair<int, MCGraph::Color> &rhs) { return lhs.first < rhs.first; });
 
     for (auto pair : checking)
     {
         std::cout << pair.first;
-        if (pair.second == MC::KGraph<>::Color::Blue)
+        if (pair.second.is_blue())
             std::cout << " b ";
         else
             std::cout << " r ";
-        std::cout << std::endl;
     }
+    std::cout << std::endl;
 }
 
 std::vector<std::tuple<int, int, int>> ReadData()

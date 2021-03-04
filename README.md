@@ -9,5 +9,5 @@
 | Set          | 1.5   | 9    |
 | Matrix       | 1.4   | 9    |
 | Language     | 0.7   | 9    |
-| OpenCL       | 0.7   | 9    |
-| Graph        | 0.7   | 9    |
+| OpenCL       | 1.1   | 9    |
+| Graph        | 0.8   | 9    |

@@ -45,7 +45,7 @@ bool MCGraph::Color::change_color () noexcept
 {
     if (empty ())
         return false;
-    data_ = 2 - data_;
+    data_ = 1 - data_;
     return true;
 }
 
@@ -61,4 +61,14 @@ char MCGraph::Color::print () const noexcept
         WARNING ("Can't print empty color!");
     }
     return 0;
+}
+
+char MCGraph::Color::get_another() const noexcept
+{
+    if (empty ())
+    {
+        WARNING ("Can't get another color!");
+        return START_VALUE;
+    }
+    return (1 - data_);
 }

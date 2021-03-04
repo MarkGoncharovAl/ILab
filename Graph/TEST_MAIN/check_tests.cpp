@@ -6,7 +6,7 @@
 #include "../KGraph/KGraph.hpp"
 
 std::vector<std::pair<int, int>> ReadData(std::ifstream &file);
-std::vector<std::pair<int, typename MC::KGraph<>::Color>> ReadData_col(std::ifstream &file);
+std::vector<std::pair<int, MCGraph::Color>> ReadData_col(std::ifstream &file);
 
 int main()
 {
@@ -26,9 +26,16 @@ int main()
         MC::KGraph<> graph;
         for (auto elem : data)
             graph.AddEdge(elem.first, elem.second);
-        auto data_DFS = graph.DFS_Bip();
+        
+        if (graph.DFS_Bip() == false)
+        {
+            WARNING("Not biparatite!");
+            return 0;
+        }
+
+        auto data_DFS = graph.GetColors();
         std::sort(data_DFS.begin(), data_DFS.end(),
-                  [](const std::pair<int, typename MC::KGraph<>::Color> &lhs, const std::pair<int, typename MC::KGraph<>::Color> &rhs) { return lhs.first < rhs.first; });
+                  [](const std::pair<int, MCGraph::Color> &lhs, const std::pair<int, MCGraph::Color> &rhs) { return lhs.first < rhs.first; });
 
         auto data_check = ReadData_col(file_check);
 
@@ -81,12 +88,12 @@ std::vector<std::pair<int, int>> ReadData(std::ifstream &file)
     return out;
 }
 
-std::vector<std::pair<int, typename MC::KGraph<>::Color>> ReadData_col(std::ifstream &file)
+std::vector<std::pair<int, MCGraph::Color>> ReadData_col(std::ifstream &file)
 {
-    std::vector<std::pair<int, typename MC::KGraph<>::Color>> out;
+    std::vector<std::pair<int, MCGraph::Color>> out;
     while (file && !file.eof() && file.good())
     {
-        std::pair<int, typename MC::KGraph<>::Color> pair;
+        std::pair<int, MCGraph::Color> pair;
         char elem = '0';
 
         file >> pair.first;
@@ -95,10 +102,10 @@ std::vector<std::pair<int, typename MC::KGraph<>::Color>> ReadData_col(std::ifst
         switch (elem)
         {
         case 'b':
-            pair.second = MC::KGraph<>::Color::Blue;
+            pair.second.data_ = MCGraph::Color::BLUE;
             break;
         case 'r':
-            pair.second = MC::KGraph<>::Color::Red;
+            pair.second.data_ = MCGraph::Color::RED;
             break;
         default:
             return out;
