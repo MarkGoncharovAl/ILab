@@ -58,6 +58,7 @@ namespace MF_help
     };
 
     CZUMout CreateZeroUnderMatrix(VecRaw_t &vec,
+                                  size_t raw,
                                   size_t num);
 
     template <class T>

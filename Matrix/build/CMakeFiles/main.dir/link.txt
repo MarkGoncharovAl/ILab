@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O3   CMakeFiles/main.dir/main.cpp.o  -o main  Libraries/libMatrix.a Common_libs/librandom.a Common_libs/liberrors.a 

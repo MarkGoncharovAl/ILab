@@ -34,16 +34,17 @@ bool MF_help::ZeroOutElem(const Matrix_t<double>::SetterRaw_t &base,
 }
 
 MF_help::CZUMout MF_help::CreateZeroUnderMatrix(VecRaw_t &vec,
+                                                size_t raw,
                                                 size_t num)
 {
-    if (std::fabs(vec[num][num]) > MF_help::approx)
+    if (std::fabs(vec[raw][num]) > MF_help::approx)
         return CZUMout::nothing;
 
-    for (size_t i = num + 1; i < vec.size(); ++i)
+    for (size_t i = raw + 1; i < vec.size(); ++i)
     {
         if (std::fabs(vec[i][num]) > MF_help::approx)
         {
-            std::swap(vec[num], vec[i]);
+            std::swap(vec[raw], vec[i]);
             return CZUMout::swapped;
         }
     }
@@ -69,24 +70,35 @@ MF_help::TriangleMatrix(Matrix_t<double> &matrix, MF::Determ_sign *swappes /* = 
     char swap = 0;
     bool zero = false;
 
+    size_t cur_raw = 0;
     for (size_t i = 0; i < min_size; ++i)
     {
-        switch (CreateZeroUnderMatrix(data, i))
+        switch (CreateZeroUnderMatrix(data, cur_raw, i))
         {
         case CZUMout::swapped:
             swap++;
             break;
         case CZUMout::zero:
             zero = true;
+            continue;
             break;
         case CZUMout::nothing:
             break;
         }
 
-        for (size_t j = i + 1; j < col_size; ++j)
+        // for (const auto& raw : data)
+        // {
+        //     for (size_t i = 0; i < raw.size(); ++i)
+        //         std::cout << raw[i] << " ";
+        //     std::cout << std::endl;
+        // }
+
+        for (size_t j = cur_raw + 1; j < col_size; ++j)
         {
-            ZeroOutElem(data[i], data[j], i);
+            ZeroOutElem(data[cur_raw], data[j], i);
         }
+
+        cur_raw++;
     }
 
     if (swappes != nullptr)

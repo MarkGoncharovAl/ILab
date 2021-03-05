@@ -195,15 +195,15 @@ TEST(CreateZeroUnderMatrix, Check)
     for (size_t i = 0; i < temp.GetSizeRaw(); ++i)
         data[i] = std::move(temp[i]);
 
-    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 0) == MF_help::CZUMout::swapped);
+    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 0, 0) == MF_help::CZUMout::swapped);
 
     temp.InitElems({{0, 0, 0},
                     {0, 1, 0},
                     {0, 0, 0}});
 
-    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 1) == MF_help::CZUMout::zero);
-    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 1) == MF_help::CZUMout::zero);
-    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 2) == MF_help::CZUMout::zero);
+    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 1, 1) == MF_help::CZUMout::zero);
+    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 1, 1) == MF_help::CZUMout::zero);
+    EXPECT_TRUE(MF_help::CreateZeroUnderMatrix(data, 2, 2) == MF_help::CZUMout::zero);
 }
 
 TEST(ITERATORS, Easy)
@@ -646,25 +646,99 @@ TEST(TriangleMatrix, Ord3)
             EXPECT_EQ(triangle[i][j], out[i][j]);
 }
 
-// TEST(TriangleMatrix, Ord4)
-// {
-//     Matrix_t<double> arr{4, 2, 0};
-//     arr.InitElems({{0, 2},
-//                    {0, 3},
-//                    {0, 4},
-//                    {0, 5}});
+TEST(TriangleMatrix, Ord4)
+{
+    Matrix_t<double> arr{4, 2, 0};
+    arr.InitElems({{0, 2},
+                   {0, 3},
+                   {0, 4},
+                   {0, 5}});
 
-//     auto triangle = MF_help::TriangleMatrix(arr);
-//     Matrix_t<double> out{4, 2, 0};
-//     out.InitElems({{0, 2},
-//                    {0, 0},
-//                    {0, 0},
-//                    {0, 0}});
+    auto triangle = MF_help::TriangleMatrix(arr);
+    Matrix_t<double> out{4, 2, 0};
+    out.InitElems({{0, 2},
+                   {0, 0},
+                   {0, 0},
+                   {0, 0}});
 
-//     for (int i = 0; i < 4; ++i)
-//         for (int j = 0; j < 2; ++j)
-//             EXPECT_EQ(triangle[i][j], out[i][j]);
-// }
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+            //std::cout << triangle[i][j] << " " << out[i][j] << "\n";
+            EXPECT_EQ(triangle[i][j], out[i][j]);
+        }
+}
+
+TEST(TriangleMatrix, Hard1)
+{
+    Matrix_t<double> arr{4, 2, 0};
+    arr.InitElems({{0, 2},
+                   {0, 3},
+                   {0, 0},
+                   {0, 5}});
+
+    auto triangle = MF_help::TriangleMatrix(arr);
+    Matrix_t<double> out{4, 2, 0};
+    out.InitElems({{0, 2},
+                   {0, 0},
+                   {0, 0},
+                   {0, 0}});
+
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+            //std::cout << triangle[i][j] << " " << out[i][j] << "\n";
+            EXPECT_EQ(triangle[i][j], out[i][j]);
+        }
+}
+
+TEST(TriangleMatrix, Hard2)
+{
+    Matrix_t<double> arr{4, 2, 0};
+    arr.InitElems({{0, 0},
+                   {0, 3},
+                   {0, 4},
+                   {0, 5}});
+
+    auto triangle = MF_help::TriangleMatrix(arr);
+    Matrix_t<double> out{4, 2, 0};
+    out.InitElems({{0, 3},
+                   {0, 0},
+                   {0, 0},
+                   {0, 0}});
+
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+            //std::cout << triangle[i][j] << " " << out[i][j] << "\n";
+            EXPECT_EQ(triangle[i][j], out[i][j]);
+        }
+}
+
+TEST(TriangleMatrix, Hard3)
+{
+    Matrix_t<double> arr{4, 3, 0};
+    arr.InitElems({{0, 0, 0},
+                   {0, 3, 0},
+                   {0, 4, 0},
+                   {0, 5, 6}});
+
+    auto triangle = MF_help::TriangleMatrix(arr);
+    Matrix_t<double> out{4, 3, 0};
+    out.InitElems({{0, 3, 0},
+                   {0, 0, 6},
+                   {0, 0, 0},
+                   {0, 0, 0}});
+
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 3; ++j)
+        {
+            //std::cout << triangle[i][j] << " " << out[i][j] << "\n";
+            EXPECT_EQ(triangle[i][j], out[i][j]);
+        }
+}
+
+
 
 TEST(NormalizeMatrix, Easy1)
 {

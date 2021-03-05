@@ -1,127 +1,11 @@
 #pragma once
+#include "KGraph.dec"
 
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <fstream>
-#include "../Common_libs/Errors/Errors.hpp"
-#include "../Common_libs/Color.hpp"
 
-namespace MCGraph
-{
-    class NamesEq_t final
-    {
-    public:
-        NamesEq_t () = default;
-        //  returns true if element was inserted
-        bool AddInfo_NTO (int new_node , int old_node);
-        int GetInfo_NTO (int node) const;
-        int GetInfo_NTO (size_t node) const;
-
-        bool AddInfo_OTN (int old_node , int new_node);
-        int GetInfo_OTN (int node) const;
-        int GetInfo_OTN (size_t node) const;
-
-    private:
-        std::unordered_map<int , int> new_TO_old_;
-        std::unordered_map<int , int> old_TO_new_;
-
-    };
-
-    struct Color
-    {
-        //USING
-        //--------------------------------------------
-        using type = char;
-
-        static constexpr char START_VALUE = -1;
-        static constexpr char BLUE = 0;
-        static constexpr char RED = 1;
-        //--------------------------------------------
-
-        explicit operator bool () const noexcept { return data_ != START_VALUE; }
-        bool empty () const noexcept { return data_ == START_VALUE; }
-
-        bool is_blue () const noexcept { return data_ == BLUE; }
-        
-        //true if color was changed
-        bool change_color() noexcept;
-        char print () const noexcept;
-        char get_another() const noexcept;
-
-        bool operator == (const Color &that) const noexcept {return data_ == that.data_;}
-        
-        //DATA
-        type data_ = START_VALUE;
-    };
-} // namespace MCGraph
-
-//Mark Class
-namespace MC
-{
-    //NT - Node type, ET - Edge type
-    template <class ET = int , class NT = MCGraph::Color>
-    class KGraph
-    {
-    public:
-        KGraph () = default;
-        KGraph (const KGraph&) = delete;
-        KGraph (KGraph&&) = delete;
-
-        KGraph (std::initializer_list<std::initializer_list<int>> data);
-
-        void AddEdge (int left , int right , ET data = ET ());
-
-        //!Debug
-        /////////////////////////////////////////////////////////////////
-        explicit operator bool () const noexcept { return !nodes_.empty (); }
-        bool empty () const noexcept { return nodes_.empty (); }
-
-        void dump (std::ostream& out) const;
-        /////////////////////////////////////////////////////////////////
-
-        //!WFS + DFS
-        /////////////////////////////////////////////////////////////////
-        std::vector<std::pair<int , int>> dumpWFS (int start_node = 0) const;
-
-        //returns true if bipartite
-        bool DFS_Bip ();
-        std::vector<std::pair<int , MCGraph::Color>> GetColors() const;
-        /////////////////////////////////////////////////////////////////
-
-    private:
-        MCGraph::NamesEq_t names_nodes_;
-
-        struct Node
-        {
-            int next_;
-            int prev_;
-            NT data_;
-        };
-        std::vector<Node> nodes_;
-        struct Edge
-        {
-            int node_;
-            int next_;
-            int prev_;
-            ET data_;
-        };
-        std::vector<Edge> edges_;
-
-        void dumpWFS_Node (int node , int width , std::unordered_map<int , int>& marked_nodes) const;
-        bool DFS_Bip_Node (int node);
-
-        int PairNode (int node) const;
-
-        static constexpr int END_FIND = -1;
-    };
-
-} // namespace MC
-// operator << is below!
-
+//Этот метод скоро удалю, но хочу сделать удобный конструктор графа
+//главное, что хочется - доавляю парами для рёбер, плюс какая то информация
+//то есть неопределённое кол-во ребёр с неопределённым кол-вом данных в них...
+//Звучит страшно, а реализовывать вообще хз как)
 template <class ET , class NT>
 MC::KGraph<ET , NT>::KGraph (std::initializer_list<std::initializer_list<int>> data)
 {
@@ -270,6 +154,7 @@ void MC::KGraph<T1 , T2>::AddEdge (int left , int right , T1 data/* = T1()*/)
 template <class T1 , class T2>
 void MC::KGraph<T1 , T2>::dump (std::ostream& out) const
 {
+    //Оставлю раскраску, это ж только для дебага... В main конечно её нет
     out << MLib::Color::Under_Purple << "\nDump is starting!\n";
     out << "Nodes:\n"
         << MLib::Color::Green;
@@ -292,6 +177,9 @@ void MC::KGraph<T1 , T2>::dump (std::ostream& out) const
 }
 
 // //!WFS
+//!Лучше не смотреть. Хоть и работает, но старая версия, бесполезная
+//В основном использовалась для понимания графа, сначала хотел писать 
+//с её помощью
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 template <class T1 , class T2>
@@ -343,68 +231,123 @@ void MC::KGraph<T1 , T2>::dumpWFS_Node (int node , int width , std::unordered_ma
 // //?WFS
 
 //!DFS
+//ГЛАВНОЕ
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 template <class T1 , class T2>
-bool MC::KGraph<T1 , T2>::DFS_Bip () 
+MCGraph::DFS_Bip_Out MC::KGraph<T1 , T2>::DFS_Bip () 
 {
     if (empty ())
     {
         WARNING ("Tried to get dumpDFS from empty graph!\n");
-        return true;
+        return MCGraph::DFS_Bip_Out{true, {}};
     }
+
+    // Проверка на то, что хранится в вершине именно цвет.
+    // Для удобства вывода, хотя, не спорю, нелогично
+    // Потому что пользователь захочет, возможно, хранить
+    // ещё данные. Думаю, чуть переделаю.
     if (typeid(T2) != typeid(MCGraph::Color))
     {
         WARNING ("Type of node isn't color!");
-        return false;
+        return MCGraph::DFS_Bip_Out{false, {}};
     }
 
     for (Node& node : nodes_)
         node.data_.data_ = MCGraph::Color::START_VALUE;
 
+    //Проверка на несолько компонент связности
+    MCGraph::DFS_Bip_Out output = {true, {}};
     for (size_t i = 0; i < nodes_.size (); ++i)
         if (nodes_[i].data_.empty())
-            if (!DFS_Bip_Node (i))
-                return false;
+            if ((output = DFS_Bip_Node (i)).is_biparatite_ == false)
+                break;
 
-    return true;
+    return output;
 }
 
 template <class T1 , class T2>
-bool MC::KGraph<T1 , T2>::DFS_Bip_Node (int node) 
+MCGraph::DFS_Bip_Out MC::KGraph<T1 , T2>::DFS_Bip_Node (int node) 
 {
+    //used for traсe of unbipartite - 
+    //как в упражнении Кнута
+    std::vector<int> nodes_parents(nodes_.size(), -1);
+    ////////
+
+    MCGraph::DFS_Bip_Out output = {true, {}};
+
+    //Нерассмотренные вершины
     std::stack<int> considered_nodes;
     considered_nodes.push(node);
     nodes_[node].data_.data_ = MCGraph::Color::BLUE;
 
     while (!considered_nodes.empty())
     {
+        //начинаем раскручивать стек
         int cur_node = considered_nodes.top();
         considered_nodes.pop();
+
+        //возвращает противоположный цвет
         MCGraph::Color::type cur_color = nodes_[cur_node].data_.get_another();
 
+        //копаем все соседние рёбра
         int cur_pos = nodes_[cur_node].next_; 
 
         while (cur_pos != END_FIND)
         {
+            //возвращает номер вершины, которая соединена с помощью
+            //рассматриваемого ребра
             int pair = PairNode (cur_pos);
             MCGraph::Color& checking = nodes_[pair].data_;
+
             if (checking.empty())
             {
+                //ещё не помечали вершину -> заносим в стэк, красим, пишем родителя
                 checking.data_ = cur_color;
                 considered_nodes.push(pair);
+                nodes_parents[pair] = cur_node;
             }
+
             else if (checking.data_ != cur_color) //element was already inserted
             {
-                //std::cout << "Color: " << names_nodes_.GetInfo_NTO(check.first->first) << std::endl;
-                return false;
+                //getting back using parent's nodes
+                output.is_biparatite_ = false;
+
+                //preparing nodes in cycle
+                //Это три вершины, точно входящие в цикл нечётной длины
+                int parent_of_pair = nodes_parents[pair];
+                output.prove_.push_back(names_nodes_.GetInfo_NTO(parent_of_pair));
+                output.prove_.push_back(names_nodes_.GetInfo_NTO(pair));
+                output.prove_.push_back(names_nodes_.GetInfo_NTO(cur_node));
+                ////////////////////////////////////////////
+
+                //debug
+                // for (const int elem : output.prove_)
+                //     std::cout << elem << " ";
+                // std::cout << "\n";
+                ////////////////////////////////////////////
+
+                //проверяем на больший цикл
+                while ((cur_node = nodes_parents[cur_node]) != parent_of_pair)
+                {
+                    output.prove_.push_back(names_nodes_.GetInfo_NTO(cur_node));
+
+                    //debug
+                    ////////////////////////////////////////////
+                    // for (const int elem : output.prove_)
+                    //     std::cout << elem << " ";
+                    // std::cout << "\n";
+                    ////////////////////////////////////////////
+                }
+
+                return output;
             }
 
             cur_pos = edges_[cur_pos].next_;
         }
     }
 
-    return true;
+    return output;
 }
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////

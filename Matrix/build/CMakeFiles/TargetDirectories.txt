@@ -1,0 +1,10 @@
+/home/mark/VS_prog/ILab/Matrix/build/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Matrix/build/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Matrix/build/CMakeFiles/test.dir
+/home/mark/VS_prog/ILab/Matrix/build/Common_libs/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Matrix/build/Common_libs/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Matrix/build/Common_libs/CMakeFiles/random.dir
+/home/mark/VS_prog/ILab/Matrix/build/Common_libs/CMakeFiles/errors.dir
+/home/mark/VS_prog/ILab/Matrix/build/Libraries/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Matrix/build/Libraries/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Matrix/build/Libraries/CMakeFiles/Matrix.dir

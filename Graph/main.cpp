@@ -13,7 +13,7 @@ int main()
         graph.AddEdge(std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
 
     //graph.dump(std::cout)
-    if (!graph.DFS_Bip())
+    if (graph.DFS_Bip().is_biparatite_ == false)
     {
         std::cout << "Graph not dicotyledonous!\n";
         return 0;

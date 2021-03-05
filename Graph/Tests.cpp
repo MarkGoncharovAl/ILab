@@ -60,12 +60,12 @@ TEST(DFS, easy)
 {
     MC::KGraph<> graph{{{0, 1}, {0, 2}}};
     std::cout << graph;
-    bool check_out = graph.DFS_Bip();
-    auto out = graph.GetColors();
+    auto&& check_out = graph.DFS_Bip();
+    auto&& out = graph.GetColors();
     std::vector<int> check = {0, 1, 2};
     std::vector<char> check_color = {0, 1, 1};
 
-    ASSERT_EQ(check_out, true);
+    ASSERT_EQ(check_out.is_biparatite_, true);
     for (size_t i = 0; i < check.size(); ++i)
     {
         //std::cout << out[i].first << std::endl;
@@ -77,17 +77,17 @@ TEST(DFS, easy2)
 {
     MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 2}}};
     std::cout << graph;
-    auto out = graph.DFS_Bip();
+    auto&& out = graph.DFS_Bip();
     std::vector<int> check = {0, 1, 2};
 
-    ASSERT_EQ(out, false);
+    ASSERT_EQ(out.is_biparatite_, false);
 }
 
 TEST(DFS, is_2_easy_true_2)
 {
     MC::KGraph<> graph{{{-1, 1}}};
-    bool check_b = graph.DFS_Bip();
-    ASSERT_EQ(check_b, true);
+    auto&& check_b = graph.DFS_Bip();
+    ASSERT_EQ(check_b.is_biparatite_, true);
 
     auto out = graph.GetColors();
     std::vector<MCGraph::Color::type> check = {0, 1};
@@ -98,15 +98,15 @@ TEST(DFS, is_2_easy_true_2)
 TEST(DFS, is_2_easy_false)
 {
     MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 2}}};
-    bool check_b = graph.DFS_Bip();
-    ASSERT_EQ(check_b, false);
+    auto&& check_b = graph.DFS_Bip();
+    ASSERT_EQ(check_b.is_biparatite_, false);
 }
 
 TEST(DFS, is_2_ord)
 {
     MC::KGraph<> graph{{{0, 1}, {2, 3}, {2, 1}}};
-    bool check_b = graph.DFS_Bip();
-    ASSERT_EQ(check_b, true);
+    auto&& check_b = graph.DFS_Bip();
+    ASSERT_EQ(check_b.is_biparatite_, true);
 }
 
 TEST(DFS, is_2_colors)
@@ -114,7 +114,8 @@ TEST(DFS, is_2_colors)
     using pair = std::pair<int, MCGraph::Color>;
 
     MC::KGraph<> graph{{{0, 1}, {2, 3}, {2, 1}}};
-    ASSERT_EQ(graph.DFS_Bip(), true);
+    auto check_b = graph.DFS_Bip();
+    ASSERT_EQ(check_b.is_biparatite_, true);
 
     auto out = graph.GetColors();
     std::vector<MCGraph::Color::type> check =
@@ -141,7 +142,8 @@ TEST(DFS, is_2_colors_HARD)
                         {1, 10},
                         {3, 6}}};
 
-    ASSERT_EQ(graph.DFS_Bip(), true);
+    auto check_b = graph.DFS_Bip();
+    ASSERT_EQ(check_b.is_biparatite_, true);
 
     auto out = graph.GetColors();
     std::vector<MCGraph::Color::type> check{10};
@@ -178,4 +180,93 @@ TEST(Add_Node, checking)
     //std::cout << graph;
     graph.AddEdge(0, 4);
     //std::cout << graph;
+}
+
+TEST(DFS, Hard1)
+{
+    MC::KGraph<> graph({{0, 1}, {0, 2}, {1, 2}});
+    auto&& bip = graph.DFS_Bip();
+    ASSERT_EQ(bip.is_biparatite_, false);
+    std::vector<int> provement = {0, 1, 2};
+    ASSERT_EQ(bip.prove_, provement);
+}
+
+TEST(DFS, Hard2)
+{
+    /*
+    0
+    |----------|
+    1          2
+    |     |----|
+    3------    |
+    |          |
+    -----------4
+    */
+    MC::KGraph<> graph({{0, 1}, {0, 2},
+                        {1, 3}, 
+                        {2, 3}, {2, 4},
+                        {3, 4}});
+
+    auto&& bip = graph.DFS_Bip();
+    ASSERT_EQ(bip.is_biparatite_, false);
+    std::vector<int> out_check = {2, 3, 4};
+    ASSERT_EQ(bip.prove_, out_check);
+}
+
+TEST(DFS, Hard3)
+{
+    /*
+    0----4-----3
+    |          |
+    1----------2
+    */
+    MC::KGraph<> graph({{0, 1}, {1, 2},
+                        {2, 3}, {3, 4}, {4, 0}});
+
+    auto&& bip = graph.DFS_Bip();
+    ASSERT_EQ(bip.is_biparatite_, false);
+    std::vector<int> out_check = {0, 1, 2, 3, 4};
+    // for (const int elem : bip.prove_)
+    //     std::cout << elem << " ";
+    // std::cout << "\n";
+    ASSERT_EQ(bip.prove_, out_check);
+}
+
+TEST(DFS, Hard4)
+{
+    /*
+    0----1
+    |    |
+    2----6-----5
+    |          |
+    3----------4
+    */
+    MC::KGraph<> graph({{0, 1}, {0, 2},
+                        {2, 3}, {3, 4},
+                        {4, 5}, {5, 6}, {6, 2}, {1, 6}});
+
+    auto&& bip = graph.DFS_Bip();
+    ASSERT_EQ(bip.is_biparatite_, false);
+    std::vector<int> out_check = {2, 3, 4, 5, 6};
+    // for (const int elem : bip.prove_)
+    //     std::cout << elem << " ";
+    // std::cout << "\n";
+    ASSERT_EQ(bip.prove_, out_check);
+}
+
+TEST(DFS, Hard5)
+{
+    /*
+    0----1
+    |    |
+    2----5
+    |    |
+    3----4
+    */
+    MC::KGraph<> graph({{0, 1}, {0, 2},
+                        {2, 5}, {2, 3},
+                        {3, 4}, {4, 5}});
+
+    auto&& bip = graph.DFS_Bip();
+    ASSERT_EQ(bip.is_biparatite_, true);
 }
