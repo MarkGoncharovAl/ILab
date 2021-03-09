@@ -57,8 +57,7 @@ namespace MCGraph
         char get_another() const noexcept;
 
         bool operator == (const Color &that) const noexcept {return data_ == that.data_;}
-        
-        //DATA
+    
         type data_ = START_VALUE;
     };
 } // namespace MCGraph
@@ -159,10 +158,6 @@ namespace MC
 ///////////////////////////////////////////////////////////////
 
 
-//Этот метод скоро удалю, но хочу сделать удобный конструктор графа
-//главное, что хочется - доавляю парами для рёбер, плюс какая то информация
-//то есть неопределённое кол-во ребёр с неопределённым кол-вом данных в них...
-//Звучит страшно, а реализовывать вообще хз как)
 template <class ET , class NT>
 MC::KGraph<ET , NT>::KGraph (std::initializer_list<std::initializer_list<int>> data)
 {
@@ -324,7 +319,6 @@ void MC::KGraph<T1 , T2>::AddEdge (int left , int right , T1 data/* = T1()*/)
 template <class T1 , class T2>
 void MC::KGraph<T1 , T2>::dump (std::ostream& out) const
 {
-    //Оставлю раскраску, это ж только для дебага... В main конечно её нет
     out << MLib::Color::Under_Purple << "\nDump is starting!\n";
     out << "Nodes:\n"
         << MLib::Color::Green;
