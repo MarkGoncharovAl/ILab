@@ -1,2 +1,0 @@
-/usr/bin/ar qc libRabKar.a  CMakeFiles/RabKar.dir/RabKar.cpp.o
-/usr/bin/ranlib libRabKar.a

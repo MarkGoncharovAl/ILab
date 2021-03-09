@@ -1,1 +1,0 @@
-/usr/bin/c++  -Wall -Wextra -O3   CMakeFiles/main.dir/main.cpp.o  -o main  MC_OpenCL/libMC_OpenCL.a NativeAlg/libNativeAlg.a RabKar/libRabKar.a /usr/lib/x86_64-linux-gnu/libOpenCL.so /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.71.0 

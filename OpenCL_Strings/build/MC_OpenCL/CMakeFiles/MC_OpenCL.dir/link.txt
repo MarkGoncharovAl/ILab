@@ -1,2 +1,0 @@
-/usr/bin/ar qc libMC_OpenCL.a  CMakeFiles/MC_OpenCL.dir/MC_OpenCL.cpp.o
-/usr/bin/ranlib libMC_OpenCL.a
