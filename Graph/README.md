@@ -33,3 +33,9 @@
 2. Нормальный возвращаемый тип
 3. Чуть меньше раскрасок
 4. Тесты!
+
+### 9/03 ###
+1. Cycles using one nodes
+2. More obviously reading graph
+3. More convenient interface: IsBipartite, GetColors, ProveNotBipartite
+4. More infromation about nodes and edges can be stored

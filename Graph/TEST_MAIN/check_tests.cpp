@@ -27,7 +27,7 @@ int main()
         for (auto elem : data)
             graph.AddEdge(elem.first, elem.second);
         
-        if (graph.DFS_Bip().is_biparatite_ == false)
+        if (!graph.IsBipartite())
         {
             WARNING("Not biparatite!");
             return 0;

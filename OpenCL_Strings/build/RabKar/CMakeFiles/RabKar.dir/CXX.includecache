@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/Common_libs/Color.hpp
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/Common_libs/Errors.hpp
+iostream
+-
+Color.hpp
+/home/mark/VS_prog/ILab/OpenCL_Strings/Common_libs/Color.hpp
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/MC_OpenCL/MC_OpenCL.hpp
+iostream
+-
+fstream
+-
+../Common_libs/Errors.hpp
+/home/mark/VS_prog/ILab/OpenCL_Strings/Common_libs/Errors.hpp
+CL/cl2.hpp
+-
+boost/program_options.hpp
+-
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/RabKar/RabKar.cpp
+RabKar.hpp
+/home/mark/VS_prog/ILab/OpenCL_Strings/RabKar/RabKar.hpp
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/RabKar/RabKar.hpp
+../MC_OpenCL/MC_OpenCL.hpp
+/home/mark/VS_prog/ILab/OpenCL_Strings/MC_OpenCL/MC_OpenCL.hpp
+openssl/sha.h
+-
+

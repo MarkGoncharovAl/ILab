@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/NativeAlg/NativeAlg.cpp
+NativeAlg.hpp
+/home/mark/VS_prog/ILab/OpenCL_Strings/NativeAlg/NativeAlg.hpp
+
+/home/mark/VS_prog/ILab/OpenCL_Strings/NativeAlg/NativeAlg.hpp
+iostream
+-
+

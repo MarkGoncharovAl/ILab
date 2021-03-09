@@ -1,0 +1,2 @@
+/usr/bin/ar qc libNativeAlg.a  CMakeFiles/NativeAlg.dir/NativeAlg.cpp.o
+/usr/bin/ranlib libNativeAlg.a

@@ -14,10 +14,6 @@ int MCGraph::NamesEq_t::GetInfo_NTO (int node) const
 
     return 0;
 }
-int MCGraph::NamesEq_t::GetInfo_NTO (size_t node) const
-{
-    return GetInfo_NTO (static_cast<int>(node));
-}
 
 bool MCGraph::NamesEq_t::AddInfo_OTN (int new_node , int old_node)
 {
@@ -32,10 +28,6 @@ int MCGraph::NamesEq_t::GetInfo_OTN (int node) const
         WARNING ("Can't GetInfo OTN from the node " + std::to_string (node));
 
     return 0;
-}
-int MCGraph::NamesEq_t::GetInfo_OTN (size_t node) const
-{
-    return GetInfo_OTN (static_cast<int>(node));
 }
 
 

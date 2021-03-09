@@ -12,8 +12,8 @@ int main()
     for (auto elem : data)
         graph.AddEdge(std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
 
-    //graph.dump(std::cout)
-    if (graph.DFS_Bip().is_biparatite_ == false)
+    //graph.dump(std::cout);
+    if (!graph.IsBipartite())
     {
         std::cout << "Graph not dicotyledonous!\n";
         return 0;
@@ -49,9 +49,21 @@ std::vector<std::tuple<int, int, int>> ReadData()
         std::cin.ignore(1);
         std::cin >> elem3;
 
-        if (std::cin.good())
-            out.push_back(std::move(std::make_tuple(elem1, elem2, elem3)));
+        if (std::cin.eof())
+        {
+            out.push_back(std::make_tuple(elem1, elem2, elem3));
+            return out;
+        }
+
+        if (!std::cin.good())
+            break;
+
+        out.push_back(std::make_tuple(elem1, elem2, elem3));
     }
+
+    if (!std::cin.eof())
+        ERROR("File wasn't read till end!");
+
 
     return out;
 }
