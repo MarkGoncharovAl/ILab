@@ -1,8 +1,8 @@
 #include "Hash_RabKar.hpp"
 
 bool clM::Hash_RabKar::LastCompare (const char* lhs ,
-                                   const char* rhs ,
-                                   size_t size)
+                                    const char* rhs ,
+                                    size_t size)
 {
     all++;
     const char* last_lhs = lhs + size;

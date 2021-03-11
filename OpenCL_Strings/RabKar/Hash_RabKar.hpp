@@ -6,7 +6,7 @@ namespace clM
     class Hash_RabKar
     {
     public:
-        using hash_type = size_t;
+        using hash_type = long int;
         //1) move + copy ctor
         //2) operator ==()
 

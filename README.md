@@ -7,7 +7,7 @@
 | Cache        | 1     | 1    |
 | Intersection | 0.9   | 9    |
 | Set          | 1.5   | 9    |
-| Matrix       | 1.4   | 9    |
+| Matrix       | 1.5   | 9    |
 | Language     | 0.7   | 9    |
-| OpenCL       | 1.1   | 9    |
-| Graph        | 0.8   | 9    |
+| OpenCL       | 1.4   | 9    |
+| Graph        | 1.1   | 9    |
