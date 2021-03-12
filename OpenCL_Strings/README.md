@@ -35,5 +35,6 @@
 @size_base@ @basis string@
 
 @size tests@
+
 @size of test string@ @test string@
 -//-
