@@ -1,7 +1,16 @@
-__kernel void RabKar(__global char* buffer, __global long int* hashes, uint size) {
+__kernel void RabKar(__global char* buffer, __global ulong* hashes, ulong size) {
     
     uint id = get_global_id(0);
     
     //REALIZE
-    hashes[id] = get_hash(buffer + id, size);
+    ulong hash = 1;
+    char* str = buffer + id;
+
+    for (ulong i = 0; i < size; ++i)
+    {
+        hash = ((hash << 8) + *str) % (1 << 31);
+        str++;
+    }
+
+    hashes[id] = hash;
 }

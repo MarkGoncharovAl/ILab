@@ -1,11 +1,13 @@
-#include "MC_OpenCL/MC_OpenCL.hpp"
-
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <cmath>
+
 #include "Common_libs/Errors.hpp"
+#include "Common_libs/Time.hpp"
+
 #include "NativeAlg/NativeAlg.hpp"
+#include "RabKar/RabKar.hpp"
 #include <openssl/sha.h>
 
 static std::string ReadBase ();
@@ -22,8 +24,21 @@ int main (int argc , char* argv [])
 
     try
     {
-        for (size_t i = 0; i < patterns.size(); ++i)
-            std::cout << i << " " << MLib::FindStrings(base, patterns[i]) << "\n";
+        clM::RabKar rabkar (std::move (device));
+
+        MLib::Time time;
+        auto&& native = MLib::FindStrings (base , patterns);
+        std::cout << "Native: " << time.GetAndResetTime ().count () << std::endl;
+        auto&& check = rabkar.FindPatterns (base , patterns);
+        std::cout << "Rabkar: " << time.GetAndResetTime ().count () << std::endl;
+
+        for (size_t i = 0; i < native.size (); ++i)
+        {
+            if (check[i] == native[i])
+                std::cout << "Equal!" << std::endl;
+            else
+                std::cout << "Not equal!" << std::endl;
+        }
     }
     catch (cl::Error& err)
     {
@@ -91,7 +106,7 @@ std::vector<std::string> ReadPatterns ()
         if (!std::cin.good ())
             throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
 
-        output.push_back(out);
+        output.push_back (out);
     }
 
     return output;

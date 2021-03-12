@@ -1,4 +1,4 @@
-# Using of OpenCL - Bitonic Sort #
+# Using of OpenCL - Findings patterns #
 ### Author: Goncharov Mark (EverRest) ###
 
 ### Содержание: ###
@@ -23,7 +23,7 @@
 
 >cd build
 * Собрать cmake проект (а именно main, e2e тесты, тесты функций tests) 
->cmake -DMAIN=ON -DE2E=ON -DTEST=ON ../
+>cmake -DMAIN=ON
 
 >make
 * Запускаем проект. При запуске main обратите внимание на аргументы командной строки
@@ -32,6 +32,8 @@
 
 Интерфейс
 =========
-Подаётся на вход количество чисел и массив. 
+@size_base@ @basis string@
 
-Программа отсортирует и определит время выполнения.
+@size tests@
+@size of test string@ @test string@
+-//-

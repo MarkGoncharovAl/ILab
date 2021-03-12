@@ -16,6 +16,7 @@ find_package(GTest REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
 option(MAIN "adding main" ON)
+option(GENERATE "generating tests" OFF)
 #option(TEST "adding google tests" OFF)
 #option(E2E "adding full_tests" OFF)
 
@@ -41,3 +42,8 @@ if (MAIN)
         Boost::program_options
     )
 endif(MAIN)
+
+if (GENERATE)
+    message("Building generating_tests")
+    add_executable(generating generating_tests.cpp)
+endif(GENERATE)

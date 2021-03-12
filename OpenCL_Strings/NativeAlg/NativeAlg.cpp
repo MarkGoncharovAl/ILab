@@ -25,3 +25,13 @@ size_t MLib::FindStrings(const std::string& base, const std::string& pattern)
     }
     return findings;
 }
+
+std::vector<size_t> MLib::FindStrings(const std::string& base, const std::vector<std::string>& patterns)
+{
+    std::vector<size_t> output;
+    output.reserve(patterns.size());
+    for (size_t i = 0; i < patterns.size(); ++i)
+        output.emplace_back(FindStrings(base, patterns[i]));
+    
+    return output;
+}
