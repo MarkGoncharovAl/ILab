@@ -6,9 +6,9 @@
 
 int main ()
 {
-    constexpr size_t size_files = 5;
-    constexpr size_t count = (1 << 25);
-    constexpr size_t tests = (1 << 2);
+    constexpr size_t size_files = 8;
+    constexpr size_t count = (1 << 20);
+    constexpr size_t tests = (1 << 4);
 
     //openening files
     std::array<std::ofstream , size_files> files;

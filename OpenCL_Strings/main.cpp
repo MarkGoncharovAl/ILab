@@ -34,10 +34,12 @@ int main (int argc , char* argv [])
 
         for (size_t i = 0; i < native.size (); ++i)
         {
-            if (check[i] == native[i])
-                std::cout << "Equal!" << std::endl;
-            else
-                std::cout << "Not equal!" << std::endl;
+            if (check[i] != native[i])
+            {
+                std::cout << "Not Equal!\nTEST: " << std::to_string (i)
+                << std::endl;
+                break;
+            }
         }
     }
     catch (cl::Error& err)
