@@ -17,12 +17,15 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 option(MAIN "adding main" ON)
 option(GENERATE "generating tests" OFF)
+option(COMPARE "comparing every tests" OFF)
+option(COMPARE_PART "comparing every tests" OFF)
 #option(TEST "adding google tests" OFF)
 #option(E2E "adding full_tests" OFF)
 
 #add_subdirectory(BSort)
 add_subdirectory(MC_OpenCL)
 add_subdirectory(NativeAlg)
+add_subdirectory(NativeAlg_GPU)
 add_subdirectory(RabKar)
 #add_subdirectory(Common_libs/Random)
 #add_subdirectory(Common_libs/Time)
@@ -35,6 +38,7 @@ if (MAIN)
     
         MC_OpenCL
         NativeAlg
+        NativeAlg_GPU
         RabKar
 
         ${OpenCL_LIBRARY}
@@ -47,3 +51,36 @@ if (GENERATE)
     message("Building generating_tests")
     add_executable(generating generating_tests.cpp)
 endif(GENERATE)
+
+if (COMPARE)
+    message("Building comparing")
+    add_executable(compare comparing.cpp)
+    target_link_libraries (
+        compare    
+    
+        MC_OpenCL
+        NativeAlg
+        NativeAlg_GPU
+        RabKar
+
+        ${OpenCL_LIBRARY}
+        OpenSSL::Crypto
+        Boost::program_options
+    )
+endif(COMPARE)
+if (COMPARE_PART)
+    message("Building comparing")
+    add_executable(compare_part comparing_part.cpp)
+    target_link_libraries (
+        compare_part    
+    
+        MC_OpenCL
+        NativeAlg
+        NativeAlg_GPU
+        RabKar
+
+        ${OpenCL_LIBRARY}
+        OpenSSL::Crypto
+        Boost::program_options
+    )
+endif(COMPARE_PART)

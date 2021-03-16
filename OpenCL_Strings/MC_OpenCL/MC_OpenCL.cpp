@@ -2,20 +2,20 @@
 
 namespace po = boost::program_options;
 
-clM::OpenCL::OpenCL (cl::Device&& device, const std::string& kernel_file)
+clM::OpenCL::OpenCL (const cl::Device& device , const std::string& kernel_file)
     : device_ (device)
 {
-    if (device_ == cl::Device{})
+    if (device_ == cl::Device {})
     {
-        WARNING("Can't create data from cl::Device{}\n");
-        throw std::invalid_argument("bad device!");
+        WARNING ("Can't create data from cl::Device{}\n");
+        throw std::invalid_argument ("bad device!");
     }
 
-    context_ = cl::Context{device_};
-    queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
+    context_ = cl::Context { device_ };
+    queue_ = cl::CommandQueue { context_, device_, CL_QUEUE_PROFILING_ENABLE };
 
-    std::string data_file = clMFunc::ReadFromFile(kernel_file);
-    program_ = cl::Program(context_, data_file, true);
+    std::string data_file = clMFunc::ReadFromFile (kernel_file);
+    program_ = cl::Program (context_ , data_file , true);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -158,11 +158,11 @@ clMFunc::GetDevices ()
     return output;
 }
 
-std::string clMFunc::ReadFromFile(const std::string &file)
+std::string clMFunc::ReadFromFile (const std::string& file)
 {
-    std::ifstream file_stream(file);
-    if (!file_stream.is_open())
-        throw std::runtime_error("Can't find file: \"" + file + "\"");
+    std::ifstream file_stream (file);
+    if (!file_stream.is_open ())
+        throw std::runtime_error ("Can't find file: \"" + file + "\"");
 
-    return std::string{std::istreambuf_iterator<char>{file_stream}, std::istreambuf_iterator<char>{}};
+    return std::string { std::istreambuf_iterator<char>{file_stream}, std::istreambuf_iterator<char>{} };
 }

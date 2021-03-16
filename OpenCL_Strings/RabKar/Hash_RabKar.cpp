@@ -21,13 +21,13 @@ clM::Hash_RabKar::HashFunction(const std::string& str)
     hash_type hash = 1; //start_value
 
     for (char symbol : str)
-        hash = (size_ASCII * hash + symbol) % max_size_;
+        hash = ((hash << 4) + symbol) % (1 << 31);
     return hash;
 }
 
-size_t clM::Hash_RabKar::Findings () const noexcept
+double clM::Hash_RabKar::Findings () const noexcept
 {
     if (all == 0)
         return 100;
-    return 100 * found / all;
+    return (100 * found) / all;
 }

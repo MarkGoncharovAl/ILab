@@ -1,6 +1,14 @@
 #pragma once
 #include <iostream>
 
+static constexpr size_t GetMaxSize() 
+{
+    size_t max_size = 0xff;
+    for (char i = 0; i < 49; ++i)
+        max_size = (max_size << 8) + 0xff;
+    return max_size;
+}
+
 namespace clM
 {
     class Hash_RabKar
@@ -13,18 +21,14 @@ namespace clM
         //!Should be realized!
         hash_type HashFunction (const std::string& str);
         bool LastCompare (const char* lhs , const char* rhs , size_t size);
-        size_t Findings () const noexcept;
+        double Findings () const noexcept;
 
         virtual ~Hash_RabKar() {};
 
     private:
-        //we should choose max_size as big as we can
-        //it would multiplicate on size_ASCII -> multiplications of them
-        //must be lesser than sizeof(hash_type)
-        static constexpr hash_type max_size_ = (1 << 31);
+        static constexpr size_t max_size_ = GetMaxSize();
 
-        static constexpr hash_type size_ASCII = (1 << 8);
-        size_t found = 0;
-        size_t all = 0;
+        double found = 0;
+        double all = 0;
     };
 }

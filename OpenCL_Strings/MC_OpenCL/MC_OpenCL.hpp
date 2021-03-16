@@ -21,12 +21,19 @@ namespace clM
     class OpenCL
     {
     public:
-        OpenCL (cl::Device&& device , const std::string& kernel_file);
+        OpenCL (const cl::Device& device , const std::string& kernel_file);
         virtual ~OpenCL () {}
 
         virtual void RunEvent (const cl::Kernel& kernel ,
                                const cl::NDRange& loc_sz ,
                                const cl::NDRange& glob_sz) = 0;
+
+        //Container MUST have:
+        //1) size
+        //2) data
+        //3) front
+        template <typename Container>
+        cl::Buffer CreateBuffer(Container& cont);
 
     protected:
         cl::Device device_;
@@ -43,4 +50,12 @@ namespace clMFunc
 
     //using for reading from kernel file
     std::string ReadFromFile (const std::string& file);
+}
+
+template <typename Container>
+cl::Buffer clM::OpenCL::CreateBuffer (Container& cont)
+{
+    cl::Buffer output (context_ , CL_MEM_READ_WRITE , cont.size () * sizeof (cont.front()));
+    queue_.enqueueWriteBuffer (output , CL_TRUE , 0 , cont.size () , cont.data ());
+    return output;
 }

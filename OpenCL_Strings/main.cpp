@@ -7,11 +7,12 @@
 #include "Common_libs/Time.hpp"
 
 #include "NativeAlg/NativeAlg.hpp"
+#include "NativeAlg_GPU/NativeAlg_GPU.hpp"
 #include "RabKar/RabKar.hpp"
 #include <openssl/sha.h>
 
 static std::string ReadBase ();
-static std::vector<std::string> ReadPatterns ();
+static clM::RabKar_Strings ReadPatterns ();
 
 int main (int argc , char* argv [])
 {
@@ -21,24 +22,40 @@ int main (int argc , char* argv [])
 
     std::string base = ReadBase ();
     auto&& patterns = ReadPatterns ();
+    auto&& patterns_vector = patterns.VecStrings();
 
     try
     {
-        clM::RabKar rabkar (std::move (device));
+        clM::RabKar rabkar (device);
+        clM::NativeAlg_GPU native_GPU(device);
 
         MLib::Time time;
-        auto&& native = MLib::FindStrings (base , patterns);
-        std::cout << "Native: " << time.GetAndResetTime ().count () << std::endl;
-        auto&& check = rabkar.FindPatterns (base , patterns);
-        std::cout << "Rabkar: " << time.GetAndResetTime ().count () << std::endl;
+        
+        time.Reset();
+        auto&& native = MLib::FindStrings (base , patterns_vector);
+        auto&& cur_time = time.GetAndResetTime().count();
+        std::cout << "Native: " << cur_time << std::endl;
+        
+        time.Reset();
+        auto&& check = rabkar.FindPatterns (base , patterns_vector);
+        cur_time = time.GetAndResetTime().count();
+        std::cout << "Rabkar: " << cur_time << std::endl;
+
+        time.Reset();
+        auto&& check_GPU = native_GPU.FindPatterns (base , patterns);
+        cur_time = time.GetAndResetTime().count();
+        std::cout << "Native_GPU: " << cur_time << std::endl;
+        
+        rabkar.HashEffect();
 
         for (size_t i = 0; i < native.size (); ++i)
         {
-            if (check[i] != native[i])
+            //std::cout << native[i] << std::endl;
+            if (check[i] != native[i] || check_GPU[i] != native[i])
             {
-                std::cout << "Not Equal!\nTEST: " << std::to_string (i)
+                std::cout << "Not Equal: " << std::to_string (i)
                 << std::endl;
-                break;
+                std::cout << native[i] << " : " << check[i] << " : " << check_GPU[i] << std::endl;
             }
         }
     }
@@ -77,17 +94,15 @@ std::string ReadBase ()
     return out;
 }
 
-std::vector<std::string> ReadPatterns ()
+clM::RabKar_Strings ReadPatterns ()
 {
+    clM::RabKar_Strings output;
     size_t count = 0;
-    std::string out;
 
     std::cin >> count;
     if (!std::cin.good ())
         throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
-
-    std::vector<std::string> output;
-    output.reserve (count);
+    output.nums_.reserve (count);
 
     for (size_t i = 0; i < count; ++i)
     {
@@ -108,7 +123,7 @@ std::vector<std::string> ReadPatterns ()
         if (!std::cin.good ())
             throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
 
-        output.push_back (out);
+        output.AddString(std::move(out));
     }
 
     return output;

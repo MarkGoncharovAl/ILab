@@ -1,4 +1,4 @@
-__kernel void RabKar(__global char* buffer, __global ulong* hashes, ulong size) {
+__kernel void PrepareHashOfBuffer(__global char* buffer, __global ulong* hashes, ulong size) {
     
     uint id = get_global_id(0);
     
@@ -8,7 +8,7 @@ __kernel void RabKar(__global char* buffer, __global ulong* hashes, ulong size) 
 
     for (ulong i = 0; i < size; ++i)
     {
-        hash = ((hash << 8) + *str) % (1 << 31);
+        hash = ((hash << 4) + *str) % (1 << 31);
         str++;
     }
 

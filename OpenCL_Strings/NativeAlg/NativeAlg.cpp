@@ -1,5 +1,6 @@
 #include "NativeAlg.hpp"
 
+
 size_t MLib::FindStrings(const std::string& base, const std::string& pattern)
 {
     const char* pat = pattern.c_str();
@@ -30,8 +31,9 @@ std::vector<size_t> MLib::FindStrings(const std::string& base, const std::vector
 {
     std::vector<size_t> output;
     output.reserve(patterns.size());
-    for (size_t i = 0; i < patterns.size(); ++i)
-        output.emplace_back(FindStrings(base, patterns[i]));
-    
+
+    for (const std::string& str : patterns)
+        output.emplace_back(FindStrings(base, str));
+
     return output;
 }
