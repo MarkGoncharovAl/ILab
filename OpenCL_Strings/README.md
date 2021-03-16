@@ -1,6 +1,8 @@
 # Using of OpenCL - Findings patterns #
 ### Author: Goncharov Mark (EverRest) ###
 
+# cmake ../ -DMAIN=ON -DGENERATE=ON -DCOMPARE=ON -DCOMPARE_PART=ON
+
 ### Содержание: ###
 1.  [Установка]()
 2.  [Интерфейс]()
