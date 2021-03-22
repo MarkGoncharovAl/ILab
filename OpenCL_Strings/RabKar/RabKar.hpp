@@ -2,7 +2,6 @@
 #include "../MC_OpenCL/MC_OpenCL.hpp"
 #include "Hash_RabKar.hpp"
 #include <unordered_map>
-#include <openssl/sha.h>
 
 namespace clM
 {

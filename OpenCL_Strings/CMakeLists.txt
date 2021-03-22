@@ -14,6 +14,7 @@ find_package(OpenCL REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 option(MAIN "adding main" ON)
 option(GENERATE "generating tests" OFF)
@@ -42,8 +43,9 @@ if (MAIN)
         RabKar
 
         ${OpenCL_LIBRARY}
-        OpenSSL::Crypto
         Boost::program_options
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
     )
 endif(MAIN)
 
@@ -64,8 +66,9 @@ if (COMPARE)
         RabKar
 
         ${OpenCL_LIBRARY}
-        OpenSSL::Crypto
         Boost::program_options
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
     )
 endif(COMPARE)
 if (COMPARE_PART)
@@ -80,7 +83,8 @@ if (COMPARE_PART)
         RabKar
 
         ${OpenCL_LIBRARY}
-        OpenSSL::Crypto
         Boost::program_options
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
     )
 endif(COMPARE_PART)

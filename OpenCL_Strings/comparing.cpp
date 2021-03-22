@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+#include <boost/filesystem.hpp>
 
 #include "Common_libs/Errors.hpp"
 #include "Common_libs/Time.hpp"
@@ -9,10 +10,10 @@
 #include "NativeAlg/NativeAlg.hpp"
 #include "NativeAlg_GPU/NativeAlg_GPU.hpp"
 #include "RabKar/RabKar.hpp"
-#include <openssl/sha.h>
 
 static std::string ReadBase (std::ifstream& file);
 static clM::RabKar_Strings ReadPatterns (std::ifstream& file);
+static std::vector<std::ifstream> OpenFilesIn (const std::string& folder);
 
 int main (int argc , char* argv [])
 {
@@ -21,16 +22,7 @@ int main (int argc , char* argv [])
         return 0;
 
     //preparing files
-    std::array<std::ifstream , 54> files;
-    size_t cur_file = 0;
-    for (std::ifstream& file : files)
-    {
-        file = std::ifstream { std::string ("../TESTS/") + std::to_string (cur_file) + ".txt" };
-        if (!file.is_open ())
-            ERROR ("File wasn't opened!");
-        ++cur_file;
-    }
-
+    auto&& files = OpenFilesIn ("../TESTS");
     std::cout << "|Native\t\t|RabKar\t\t|\n";
 
     for (auto&& file : files)
@@ -89,6 +81,30 @@ int main (int argc , char* argv [])
 
     }
     return 0;
+}
+
+std::vector<std::ifstream> OpenFilesIn (const std::string& folder_name)
+{
+    std::vector<std::ifstream> out;
+
+    namespace bfs = boost::filesystem;
+    bfs::path folder { folder_name };
+    if (!bfs::exists (folder))
+    {
+        WARNING (std::string ("Can't find folder ") + folder_name);
+        return out;
+    }
+
+    //folder exists
+    bfs::directory_iterator iter(folder), end;
+    for (; iter != end; ++iter)
+    {
+        if (bfs::is_regular_file (*iter))
+            out.push_back (std::ifstream { iter->path ().string () });
+        //std::cout << iter->path () << std::endl;
+    }
+
+    return out;
 }
 
 std::string ReadBase (std::ifstream& file)

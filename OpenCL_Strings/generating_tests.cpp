@@ -7,15 +7,15 @@
 int main ()
 {
     constexpr size_t size_files = 6;
-    constexpr size_t count = (1 << 16);
-    constexpr size_t tests[3] = { 128, (1 << 10), (1 << 15) };
-    MLib::Random rand_small (56 , 60); //ranges of random
+    constexpr size_t count = (1 << 15);
+    constexpr size_t tests = (1 << 15) ;
+    MLib::Random rand_small (57 , 60); //ranges of random
     MLib::Random rand_middle (45 , 60);
     MLib::Random rand_big (40 , 100);
-    size_t size_test = 1;
+    size_t size_test = 16;
 
     //openening files
-    std::array<std::ofstream , 9 * size_files> files;
+    std::array<std::ofstream , size_files> files;
     size_t cur_file = 0;
     for (std::ofstream& file : files)
     {
@@ -25,101 +25,32 @@ int main ()
         ++cur_file;
     }
 
-    for (size_t l = 0; l < 3; ++l)
+    //!Small tests
+    for (size_t i = 0; i < size_files; ++i)
     {
-        //!Small tests
-        for (size_t i = 0; i < size_files; ++i)
+        //size
+        files[i] << count;
+        files[i] << " ";
+
+        //base
+        for (size_t j = 0; j < count; ++j)
+            //rand > 0 and rand < 256 -> cast is good
+            files[i] << static_cast<char>(rand_small.get ());
+
+        //amount of tests in one file
+        files[i] << "\n" << tests << "\n";
+
+        //patterns
+        for (size_t k = 0; k < tests; ++k)
         {
-            //size
-            files[18 * l + i] << count;
-            files[18 * l + i] << " ";
-
-            //base
-            for (size_t j = 0; j < count; ++j)
-            {
-                //rand > 0 and rand < 256 -> cast is good
-                files[18 * l + i] << static_cast<char>(rand_small.get ());
-            }
-
-            //amount of tests in one file
-            files[18 * l + i] << "\n" << tests[l] << "\n";
-
-            //patterns
-            for (size_t k = 0; k < tests[l]; ++k)
-            {
-                files[18 * l + i] << size_test << " ";
-                for (size_t j = 0; j < size_test; ++j)
-                {
-                    files[18 * l + i] << static_cast<char>(rand_small.get ());
-                }
-                files[18 * l + i] << "\n";
-            }
-
-            size_test <<= 1;
+            files[i] << size_test << " ";
+            for (size_t j = 0; j < size_test; ++j)
+                files[i] << static_cast<char>(rand_small.get ());
+            
+            files[i] << "\n";
         }
 
-        //!Middle tests
-        size_test = 1;
-        for (size_t i = size_files; i < size_files * 2; ++i)
-        {
-            //size
-            files[18 * l + i] << count;
-            files[18 * l + i] << " ";
-
-            //base
-            for (size_t k = 0; k < count; ++k)
-            {
-                //rand > 0 and rand < 256 -> cast is good
-                files[18 * l + i] << static_cast<char>(rand_middle.get ());
-            }
-
-            //amount of tests in one file
-            files[18 * l + i] << "\n" << tests[l] << "\n";
-
-            //patterns
-            for (size_t k = 0; k < tests[l]; ++k)
-            {
-                files[18 * l + i] << size_test << " ";
-                for (size_t j = 0; j < size_test; ++j)
-                {
-                    files[18 * l + i] << static_cast<char>(rand_middle.get ());
-                }
-                files[18 * l + i] << "\n";
-            }
-
-            size_test <<= 1;
-        }
-
-        //!Big tests
-        size_test = 1;
-        for (size_t i = size_files * 2; i < size_files * 3; ++i)
-        {
-            //size
-            files[18 * l + i] << count;
-            files[18 * l + i] << " ";
-
-            //base
-            for (size_t k = 0; k < count; ++k)
-            {
-                //rand > 0 and rand < 256 -> cast is good
-                files[18 * l + i] << static_cast<char>(rand_big.get ());
-            }
-
-            //amount of tests in one file
-            files[18 * l + i] << "\n" << tests[l] << "\n";
-
-            //patterns
-            for (size_t k = 0; k < tests[l]; ++k)
-            {
-                files[18 * l + i] << size_test << " ";
-                for (size_t j = 0; j < size_test; ++j)
-                {
-                    files[18 * l + i] << static_cast<char>(rand_big.get ());
-                }
-                files[18 * l + i] << "\n";
-            }
-
-            size_test <<= 1;
-        }
+        size_test <<= 1;
+        files[i].close();
     }
 }

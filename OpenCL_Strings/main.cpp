@@ -9,7 +9,6 @@
 #include "NativeAlg/NativeAlg.hpp"
 #include "NativeAlg_GPU/NativeAlg_GPU.hpp"
 #include "RabKar/RabKar.hpp"
-#include <openssl/sha.h>
 
 static std::string ReadBase ();
 static clM::RabKar_Strings ReadPatterns ();
@@ -27,7 +26,6 @@ int main (int argc , char* argv [])
     try
     {
         clM::RabKar rabkar (device);
-        clM::NativeAlg_GPU native_GPU(device);
 
         MLib::Time time;
         
@@ -40,22 +38,17 @@ int main (int argc , char* argv [])
         auto&& check = rabkar.FindPatterns (base , patterns_vector);
         cur_time = time.GetAndResetTime().count();
         std::cout << "Rabkar: " << cur_time << std::endl;
-
-        time.Reset();
-        auto&& check_GPU = native_GPU.FindPatterns (base , patterns);
-        cur_time = time.GetAndResetTime().count();
-        std::cout << "Native_GPU: " << cur_time << std::endl;
         
         rabkar.HashEffect();
 
         for (size_t i = 0; i < native.size (); ++i)
         {
             //std::cout << native[i] << std::endl;
-            if (check[i] != native[i] || check_GPU[i] != native[i])
+            if (check[i] != native[i])
             {
                 std::cout << "Not Equal: " << std::to_string (i)
                 << std::endl;
-                std::cout << native[i] << " : " << check[i] << " : " << check_GPU[i] << std::endl;
+                std::cout << native[i] << " : " << check[i] << std::endl;
             }
         }
     }
