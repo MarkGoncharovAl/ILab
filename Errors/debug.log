@@ -1,0 +1,6 @@
+
+FATAL File[___Examples.cpp] Line[___6] fatal
+ERROR File[___Examples.cpp] Line[___7] error
+WARN  File[___Examples.cpp] Line[___8] warning
+debug File[___Examples.cpp] Line[___9] debug
+trace File[___Examples.cpp] Line[__10] trace

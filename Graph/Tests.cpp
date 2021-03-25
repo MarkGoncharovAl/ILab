@@ -4,157 +4,157 @@
 #include "KGraph/KGraph.hpp"
 #include "Common_libs/Random/Random.hpp"
 
-int main(int argc, char *argv[])
+int main (int argc , char* argv [])
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest (&argc , argv);
+    return RUN_ALL_TESTS ();
 }
 
-TEST(Dump, lesson)
+TEST (Dump , lesson)
 {
     //был на уроке
-    MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3}}};
+    MC::KGraph<> graph { {{0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3}} };
     std::cout << graph;
 }
 
-TEST(DFS, easy)
+TEST (DFS , easy)
 {
-    MC::KGraph<> graph{{{0, 1}, {0, 2}}};
+    MC::KGraph<> graph { {{0, 1}, {0, 2}} };
     std::cout << graph;
-    bool check_out = graph.IsBipartite();
-    auto&& out = graph.GetColors();
-    std::vector<int> check = {0, 1, 2};
-    std::vector<char> check_color = {0, 1, 1};
+    bool check_out = graph.IsBipartite ();
+    auto&& out = graph.GetColors ();
+    std::vector<int> check = { 0, 1, 2 };
+    std::vector<char> check_color = { 0, 1, 1 };
 
-    ASSERT_EQ(check_out, true);
-    for (size_t i = 0; i < check.size(); ++i)
+    ASSERT_EQ (check_out , true);
+    for (size_t i = 0; i < check.size (); ++i)
     {
         //std::cout << out[i].first << std::endl;
-        ASSERT_EQ(out[i].first, check[i]);
-        ASSERT_EQ(out[i].second.data_, check_color[i]);
+        ASSERT_EQ (out[i].first , check[i]);
+        ASSERT_EQ (out[i].second.data_ , check_color[i]);
     }
 }
-TEST(DFS, easy2)
+TEST (DFS , easy2)
 {
-    MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 2}}};
+    MC::KGraph<> graph { {{0, 1}, {0, 2}, {1, 2}} };
     std::cout << graph;
-    bool out = graph.IsBipartite();
-    std::vector<int> check = {0, 1, 2};
+    bool out = graph.IsBipartite ();
+    std::vector<int> check = { 0, 1, 2 };
 
-    ASSERT_EQ(out, false);
+    ASSERT_EQ (out , false);
 }
 
-TEST(DFS, is_2_easy_true_2)
+TEST (DFS , is_2_easy_true_2)
 {
-    MC::KGraph<> graph{{{-1, 1}}};
-    bool check_b = graph.IsBipartite();
-    ASSERT_EQ(check_b, true);
+    MC::KGraph<> graph { {{-1, 1}} };
+    bool check_b = graph.IsBipartite ();
+    ASSERT_EQ (check_b , true);
 
-    auto out = graph.GetColors();
-    std::vector<MCGraph::Color::type> check = {0, 1};
-    for (size_t i = 0; i < check.size(); ++i)
-        ASSERT_EQ(out[i].second.data_, check[i]);
+    auto out = graph.GetColors ();
+    std::vector<MCGraph::Color::type> check = { 0, 1 };
+    for (size_t i = 0; i < check.size (); ++i)
+        ASSERT_EQ (out[i].second.data_ , check[i]);
 }
 
-TEST(DFS, is_2_easy_false)
+TEST (DFS , is_2_easy_false)
 {
-    MC::KGraph<> graph{{{0, 1}, {0, 2}, {1, 2}}};
-    bool check_b = graph.IsBipartite();
-    ASSERT_EQ(check_b, false);
+    MC::KGraph<> graph { {{0, 1}, {0, 2}, {1, 2}} };
+    bool check_b = graph.IsBipartite ();
+    ASSERT_EQ (check_b , false);
 }
 
-TEST(DFS, is_2_ord)
+TEST (DFS , is_2_ord)
 {
-    MC::KGraph<> graph{{{0, 1}, {2, 3}, {2, 1}}};
-    bool check_b = graph.IsBipartite();
-    ASSERT_EQ(check_b, true);
+    MC::KGraph<> graph { {{0, 1}, {2, 3}, {2, 1}} };
+    bool check_b = graph.IsBipartite ();
+    ASSERT_EQ (check_b , true);
 }
 
-TEST(DFS, is_2_colors)
+TEST (DFS , is_2_colors)
 {
-    using pair = std::pair<int, MCGraph::Color>;
+    using pair = std::pair<int , MCGraph::Color>;
 
-    MC::KGraph<> graph{{{0, 1}, {2, 3}, {2, 1}}};
-    bool check_b = graph.IsBipartite();
-    ASSERT_EQ(check_b, true);
+    MC::KGraph<> graph { {{0, 1}, {2, 3}, {2, 1}} };
+    bool check_b = graph.IsBipartite ();
+    ASSERT_EQ (check_b , true);
 
-    auto out = graph.GetColors();
+    auto out = graph.GetColors ();
     std::vector<MCGraph::Color::type> check =
-        {0, 1, 0, 1};
+    { 0, 1, 0, 1 };
 
-    std::sort(out.begin(), out.end(),
-              [](const pair &lhs, const pair &rhs) { return lhs.first < rhs.first; });
+    std::sort (out.begin () , out.end () ,
+              [](const pair& lhs , const pair& rhs) { return lhs.first < rhs.first; });
 
-    for (size_t i = 0; i < check.size(); ++i)
-        ASSERT_EQ(out[i].second.data_, check[i]);
+    for (size_t i = 0; i < check.size (); ++i)
+        ASSERT_EQ (out[i].second.data_ , check[i]);
 }
 
-TEST(DFS, is_2_colors_HARD)
+TEST (DFS , is_2_colors_HARD)
 {
-    using pair = std::pair<int, MCGraph::Color>;
+    using pair = std::pair<int , MCGraph::Color>;
 
     // 1    6
     // 2    7
     // 3    8
     // 4    9
     // 5    10
-    MC::KGraph<> graph{{{1, 6}, {1, 7}, {2, 9}, {2, 10}, {3, 7}, {3, 8}, {4, 7}, {4, 9}, {5, 6}, {5, 10},
-                        //extra
-                        {1, 10},
-                        {3, 6}}};
+    MC::KGraph<> graph { {{1, 6}, {1, 7}, {2, 9}, {2, 10}, {3, 7}, {3, 8}, {4, 7}, {4, 9}, {5, 6}, {5, 10},
+        //extra
+        {1, 10},
+        {3, 6}} };
 
-    bool check_b = graph.IsBipartite();
-    ASSERT_EQ(check_b, true);
+    bool check_b = graph.IsBipartite ();
+    ASSERT_EQ (check_b , true);
 
-    auto out = graph.GetColors();
-    std::vector<MCGraph::Color::type> check{10};
+    auto out = graph.GetColors ();
+    std::vector<MCGraph::Color::type> check { 10 };
     for (size_t i = 0; i < 5; ++i)
         check[i] = MCGraph::Color::BLUE;
     for (size_t i = 5; i < 10; ++i)
         check[i] = MCGraph::Color::RED;
 
-    std::sort(out.begin(), out.end(),
-              [](const pair &lhs, const pair &rhs) { return lhs.first < rhs.first; });
+    std::sort (out.begin () , out.end () ,
+              [](const pair& lhs , const pair& rhs) { return lhs.first < rhs.first; });
 
-    for (size_t i = 0; i < check.size(); ++i)
-        ASSERT_EQ(out[i].second.data_, check[i]);
+    for (size_t i = 0; i < check.size (); ++i)
+        ASSERT_EQ (out[i].second.data_ , check[i]);
 }
 
-TEST(Add_Node, easy)
+TEST (Add_Node , easy)
 {
     MC::KGraph<> graph;
-    graph.AddEdge(0, 1);
+    graph.AddEdge (0 , 1);
     //std::cout << graph;
-    graph.AddEdge(2, 3);
+    graph.AddEdge (2 , 3);
     //std::cout << graph;
 }
 
-TEST(Add_Node, checking)
+TEST (Add_Node , checking)
 {
-    MC::KGraph<> graph{{{0, 1}, {0, 2}}};
+    MC::KGraph<> graph { {{0, 1}, {0, 2}} };
     //std::cout << graph;
-    graph.AddEdge(0, 3);
+    graph.AddEdge (0 , 3);
     //std::cout << graph;
-    graph.AddEdge(4, 5);
+    graph.AddEdge (4 , 5);
     //std::cout << graph;
-    graph.AddEdge(1, 5);
+    graph.AddEdge (1 , 5);
     //std::cout << graph;
-    graph.AddEdge(0, 4);
+    graph.AddEdge (0 , 4);
     //std::cout << graph;
 }
 
-TEST(DFS, Hard1)
+TEST (DFS , Hard1)
 {
-    MC::KGraph<> graph({{0, 1}, {0, 2}, {1, 2}});
-    bool bip = graph.IsBipartite();
-    ASSERT_EQ(bip, false);
+    MC::KGraph<> graph ({ {0, 1}, {0, 2}, {1, 2} });
+    bool bip = graph.IsBipartite ();
+    ASSERT_EQ (bip , false);
 
-    auto&& checking = graph.ProveNotBipartite();
-    std::vector<int> provement = {0, 1, 2};
-    ASSERT_EQ(checking, provement);
+    auto&& checking = graph.ProveNotBipartite ();
+    std::vector<int> provement = { 0, 1, 2 };
+    ASSERT_EQ (checking , provement);
 }
 
-TEST(DFS, Hard2)
+TEST (DFS , Hard2)
 {
     /*
     0
@@ -165,38 +165,38 @@ TEST(DFS, Hard2)
     |          |
     -----------4
     */
-    MC::KGraph<> graph({{0, 1}, {0, 2},
-                        {1, 3}, 
+    MC::KGraph<> graph ({ {0, 1}, {0, 2},
+                        {1, 3},
                         {2, 3}, {2, 4},
-                        {3, 4}});
+                        {3, 4} });
 
-    bool bip = graph.IsBipartite();
-    ASSERT_EQ(bip, false);
+    bool bip = graph.IsBipartite ();
+    ASSERT_EQ (bip , false);
 
-    auto&& checking = graph.ProveNotBipartite();
-    std::vector<int> out_check = {2, 3, 4};
-    ASSERT_EQ(checking, out_check);
+    auto&& checking = graph.ProveNotBipartite ();
+    std::vector<int> out_check = { 2, 3, 4 };
+    ASSERT_EQ (checking , out_check);
 }
 
-TEST(DFS, Hard3)
+TEST (DFS , Hard3)
 {
     /*
     0----4-----3
     |          |
     1----------2
     */
-    MC::KGraph<> graph({{0, 1}, {1, 2},
-                        {2, 3}, {3, 4}, {4, 0}});
+    MC::KGraph<> graph ({ {0, 1}, {1, 2},
+                        {2, 3}, {3, 4}, {4, 0} });
 
-    bool bip = graph.IsBipartite();
-    ASSERT_EQ(bip, false);
+    bool bip = graph.IsBipartite ();
+    ASSERT_EQ (bip , false);
 
-    auto&& checking = graph.ProveNotBipartite();
-    std::vector<int> out_check = {0, 1, 2, 3, 4};
-    ASSERT_EQ(checking, out_check);
+    auto&& checking = graph.ProveNotBipartite ();
+    std::vector<int> out_check = { 0, 1, 2, 3, 4 };
+    ASSERT_EQ (checking , out_check);
 }
 
-TEST(DFS, Hard4)
+TEST (DFS , Hard4)
 {
     /*
     0----1
@@ -205,50 +205,120 @@ TEST(DFS, Hard4)
     |          |
     3----------4
     */
-    MC::KGraph<> graph({{0, 1}, {0, 2},
+    MC::KGraph<> graph ({ {0, 1}, {0, 2},
                         {2, 3}, {3, 4},
-                        {4, 5}, {5, 6}, {6, 2}, {1, 6}});
+                        {4, 5}, {5, 6}, {6, 2}, {1, 6} });
 
-    bool bip = graph.IsBipartite();
-    ASSERT_EQ(bip, false);
+    bool bip = graph.IsBipartite ();
+    ASSERT_EQ (bip , false);
 
-    auto&& checking = graph.ProveNotBipartite();
-    std::vector<int> out_check = {2, 3, 4, 5, 6};
-    ASSERT_EQ(checking, out_check);
+    auto&& checking = graph.ProveNotBipartite ();
+    std::vector<int> out_check = { 2, 3, 4, 5, 6 };
+    ASSERT_EQ (checking , out_check);
 }
 
-TEST(DFS, Hard5)
+TEST (DFS , Hard5)
 {
     /*
     0----1
     |    |
-    
+
     2----5
     |    |
     3----4
     */
-    MC::KGraph<> graph({{0, 1}, {0, 2},
+    MC::KGraph<> graph ({ {0, 1}, {0, 2},
                         {2, 5}, {2, 3},
-                        {3, 4}, {4, 5}});
+                        {3, 4}, {4, 5} });
 
-    bool bip = graph.IsBipartite();
-    ASSERT_EQ(bip, true);
+    bool bip = graph.IsBipartite ();
+    ASSERT_EQ (bip , true);
 }
 
-TEST(same_node, simple)
+TEST (same_node , simple)
 {
     MC::KGraph<> graph;
-    graph.AddEdge(1, 1, 10);
+    graph.AddEdge (1 , 1 , 10);
 
-    graph.dump(std::cout);
+    graph.dump (std::cout);
 }
 
-TEST(CopyCtor, simple)
+TEST (CopyCtor , simple)
 {
-    MC::KGraph<> graph({{0, 1}, {0, 2},
+    MC::KGraph<> graph ({ {0, 1}, {0, 2},
                         {2, 5}, {2, 3},
-                        {3, 4}, {4, 5}});
-    graph.dump(std::cout);
-    MC::KGraph<> graph2{graph};
-    graph2.dump(std::cout);
+                        {3, 4}, {4, 5} });
+    graph.dump (std::cout);
+    MC::KGraph<> graph2 { graph };
+    graph2.dump (std::cout);
+}
+
+TEST (DeleteNode , easy)
+{
+    MC::KGraph<> graph;
+    graph.AddEdge (1 , 2);
+    graph.AddEdge (1 , 3);
+
+    int i = 0, j = 0;
+    for (auto&& node = graph.cbegin (); node != graph.cend (); ++node)
+    {
+        std::cout << "Node: " << *node << ":\t";
+        for (auto&& edge = node.cbegin(); edge != node.cend(); ++edge)
+        {
+            std::cout << graph.GetPairNode (edge.GetPosition ()) << "\t";
+            j++;
+        }
+        std::cout << "\n";
+        i++;
+        j = 0;
+    }
+    graph.DeleteEdge (1, 3);
+    std::cout << graph;
+}
+
+TEST (Iterator , easy)
+{
+    MC::KGraph<> graph;
+    graph.AddEdge (1 , 2);
+    graph.AddEdge (4 , 3);
+    graph.AddEdge (2 , 3);
+    graph.AddEdge (1 , 4);
+    graph.AddEdge (1 , 10);
+
+    //std::cout << graph;
+    int check[5][3] = {{2, 4, 10}, {1, 3}, {3, 1}, {4, 2}, {1}};
+
+    int i = 0, j = 0;
+    for (auto&& node = graph.cbegin (); node != graph.cend (); ++node)
+    {
+        for (auto&& edge = node.cbegin(); edge != node.cend(); ++edge)
+        {
+            ASSERT_TRUE (check[i][j] == graph.GetPairNode (edge.GetPosition ()));
+            j++;
+        }
+        i++;
+        j = 0;
+    }
+    //std::cout << "\n";
+}
+
+TEST (Iterator , mid)
+{
+    MC::KGraph<> graph;
+    graph.AddEdge (1 , 2);
+    graph.AddEdge (4 , 3);
+    graph.AddEdge (2 , 3);
+    graph.AddEdge (1 , 4);
+    graph.AddEdge (1 , 10);
+
+    //std::cout << graph;
+    int check[] = {1, 3};
+
+    int i = 0;
+    for (auto&& node = graph.cnbegin (2); node != graph.cnend (); ++node)
+    {
+        ASSERT_EQ(check[i], graph.GetPairNode (node.GetPosition()));
+        i++;
+    }
+    //std::cout << "\n";
 }

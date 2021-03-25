@@ -1,78 +1,19 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <fstream>
-#include "../Common_libs/Errors/Errors.hpp"
-#include "../Common_libs/Color.hpp"
-
-//!DECALARATIONS
-namespace MCGraph
-{
-    //I use it, because it's so convenient.
-    //although not efficient in using memory...
-    class NamesEq_t final
-    {
-    public:
-        //  returns true if element was inserted
-        bool AddInfo_NTO (int new_node , int old_node);
-        int GetInfo_NTO (int node) const;
-
-        bool AddInfo_OTN (int old_node , int new_node);
-        int GetInfo_OTN (int node) const;
-
-    private:
-        std::unordered_map<int , int> new_TO_old_;
-        std::unordered_map<int , int> old_TO_new_;
-    };
-
-    //to colorize nodes
-    struct Color
-    {
-        //USING
-        //--------------------------------------------
-        using type = char;
-
-        static constexpr type START_VALUE = -1;
-        static constexpr type BLUE = 0;
-        static constexpr type RED = 1;
-        //--------------------------------------------
-
-        explicit operator bool () const noexcept { return data_ != START_VALUE; }
-        bool empty () const noexcept { return data_ == START_VALUE; }
-
-        bool is_blue () const noexcept { return data_ == BLUE; }
-        
-        //true if color was changed
-        bool change_color() noexcept;
-
-        //out char of data_ to print in std::cout ('b' or 'r')
-        char print () const noexcept;
-
-        //returns differ color 
-        char get_another() const noexcept;
-
-        bool operator == (const Color &that) const noexcept {return data_ == that.data_;}
-    
-        type data_ = START_VALUE;
-    };
-} // namespace MCGraph
+#include "KGraphClasses.hpp"
+#include "KGraphIterator.hpp"
 
 //Mark Class -> MC
 namespace MC
 {
     //NT - Node type, ET - Edge type
-    template <class ET = int , class NT = MCGraph::Color>
+    template <class ET = int , class NT = int>
     class KGraph
     {
     public:
         //without it doesn't work:
         //MC::KGraph<> graph;
-        KGraph() = default;
+        KGraph () = default;
 
         KGraph (std::initializer_list<std::initializer_list<int>> data);
 
@@ -89,34 +30,36 @@ namespace MC
         //!DFS
         /////////////////////////////////////////////////////////////////
         //returns Nodes' colors in Graph
-        std::vector<std::pair<int , MCGraph::Color>> GetColors();
-        bool IsBipartite();
-        std::vector<int> ProveNotBipartite();
+        std::vector<std::pair<int , MCGraph::Color>> GetColors ();
+        bool IsBipartite ();
+        std::vector<int> ProveNotBipartite ();
         /////////////////////////////////////////////////////////////////
+
+        //!Spanning tree
+        /////////////////////////////////////////////////////////////////
+        void DeleteEdge (int left , int right);
+        /////////////////////////////////////////////////////////////////
+
+        //Iterator
+        /////////////////////////////////////////////////////////////////
+        MCGraph::const_iterator<ET , NT> cbegin () const noexcept;
+        MCGraph::const_iterator<ET , NT> cend () const noexcept;
+        MCGraph::const_iterator_edge<ET> cnbegin (int node) const noexcept;
+        MCGraph::const_iterator_edge<ET> cnend () const noexcept;
+        /////////////////////////////////////////////////////////////////
+
+        int GetPairNode (int node) const; //for users names
 
     private:
         MCGraph::NamesEq_t names_nodes_;
+        std::vector<MCGraph::Node<NT>> nodes_;
+        std::vector<MCGraph::Edge<ET>> edges_;
 
-        struct Node
-        {
-            int next_ = -1;
-            int prev_ = -1;
-            NT data_;
-            MCGraph::Color color_;
-        };
-        std::vector<Node> nodes_;
-        struct Edge
-        {
-            int node_ = -1;
-            int next_ = -1;
-            int prev_ = -1;
-            ET data_;
-        };
-        std::vector<Edge> edges_;
+        int PairNode (int node) const; //for graph's names
 
         // to control functions <is_bipartite, GetColors>
         ////////////////
-        enum class bipar {NOT_CORRECT, TRUE, FALSE};
+        enum class bipar { NOT_CORRECT , TRUE , FALSE };
         bipar is_colorized_ = bipar::NOT_CORRECT;
         ////////////////
 
@@ -126,9 +69,16 @@ namespace MC
         std::vector<int> ColorizeNodes_Component (int node);
         ////////////////////////////////////
 
-        int PairNode (int node) const;
-
         static constexpr int END_FIND = -1;
+
+        //Iterator
+        /////////////////////////////////////////////////////////////////
+        MCGraph::iterator<ET , NT> begin () noexcept;
+        MCGraph::iterator<ET , NT> end () noexcept;
+        MCGraph::iterator_edge<ET> nbegin (int node) noexcept;
+        MCGraph::iterator_edge<ET> nend () noexcept;
+        /////////////////////////////////////////////////////////////////
+
     };
 
 } // namespace MC
@@ -319,8 +269,8 @@ void MC::KGraph<T1 , T2>::AddEdge (int left , int right , T1 data/* = T1()*/)
 template <class T1 , class T2>
 void MC::KGraph<T1 , T2>::dump (std::ostream& out) const
 {
-    out << MLib::Color::Under_Purple << "\nDump is starting!\n";
-    out << "Nodes:\n"
+    out << MLib::Color::Under_Purple
+        << "\nNodes:\n"
         << MLib::Color::Green;
     out << "|Node\t|Next\t|Prev\t|\n";
     out << "-------------------------\n";
@@ -330,14 +280,13 @@ void MC::KGraph<T1 , T2>::dump (std::ostream& out) const
 
     out << MLib::Color::Under_Purple << "Edges:\n"
         << MLib::Color::Green;
-    out << "|Node\t|Next\t|Prev\n";
+    out << "|Node\t|Next\t|Index\t|Prev\n";
     out << "-------------------------\n";
 
     for (size_t i = 0; i < edges_.size (); ++i)
-        out << "|" << edges_[i].node_ << "\t| " << edges_[i].next_ << "\t| " << edges_[i].prev_ << "\t|\n";
+        out << "|" << names_nodes_.GetInfo_NTO (edges_[i].node_) << "\t| " << edges_[i].next_ << "\t| " << i << "\t|" << edges_[i].prev_ << "\t|\n";
 
-    out << MLib::Color::Under_Purple << "Dump is ended!\n\n"
-        << MLib::Color::Reset;
+    out << MLib::Color::Reset;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -348,8 +297,9 @@ void MC::KGraph<T1 , T2>::dump (std::ostream& out) const
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 //!DFS
+
 template <class T1 , class T2>
-std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes () 
+std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes ()
 {
     if (empty ())
     {
@@ -357,7 +307,7 @@ std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes ()
         return std::vector<int>{};
     }
 
-    for (Node& node : nodes_)
+    for (auto&& node : nodes_)
         node.color_.data_ = MCGraph::Color::START_VALUE;
 
     is_colorized_ = bipar::TRUE;
@@ -365,48 +315,48 @@ std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes ()
 
     //checking for several components
     for (size_t i = 0; i < nodes_.size (); ++i)
-        if (nodes_[i].color_.empty() &&
-           (output = ColorizeNodes_Component (i)).empty() == false)
-                break;
+        if (nodes_[i].color_.empty () &&
+           (output = ColorizeNodes_Component (i)).empty () == false)
+            break;
 
     return output;
 }
 
 template <class T1 , class T2>
-std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes_Component (int node) 
+std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes_Component (int node)
 {
     //output - cycle of odd length
     std::vector<int> proving;
 
     //used for traсe of unbipartite - 
     //like Knut
-    std::vector<int> nodes_parents(nodes_.size(), -1);
+    std::vector<int> nodes_parents (nodes_.size () , -1);
 
     //Not colorized nodes
     std::stack<int> considered_nodes;
-    considered_nodes.push(node);
+    considered_nodes.push (node);
     nodes_[node].color_.data_ = MCGraph::Color::BLUE;
 
-    while (!considered_nodes.empty())
+    while (!considered_nodes.empty ())
     {
         //beginning to release stack
-        int cur_node = considered_nodes.top();
-        considered_nodes.pop();
+        int cur_node = considered_nodes.top ();
+        considered_nodes.pop ();
 
-        MCGraph::Color::type cur_color = nodes_[cur_node].color_.get_another();
+        MCGraph::Color::type cur_color = nodes_[cur_node].color_.get_another ();
 
         //looking to every neighboor
-        int cur_pos = nodes_[cur_node].next_; 
+        int cur_pos = nodes_[cur_node].next_;
         while (cur_pos != END_FIND)
         {
             int pair = PairNode (cur_pos);
             MCGraph::Color& checking = nodes_[pair].color_;
 
-            if (checking.empty())
+            if (checking.empty ())
             {
                 //haven't colored -> colorize and write a parent
                 checking.data_ = cur_color;
-                considered_nodes.push(pair);
+                considered_nodes.push (pair);
                 nodes_parents[pair] = cur_node;
             }
 
@@ -420,20 +370,20 @@ std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes_Component (int node)
 
                 if (parent_of_pair == -1)
                 {
-                    proving.push_back(names_nodes_.GetInfo_NTO(pair));
-                    proving.push_back(names_nodes_.GetInfo_NTO(cur_node));
+                    proving.push_back (names_nodes_.GetInfo_NTO (pair));
+                    proving.push_back (names_nodes_.GetInfo_NTO (cur_node));
                 }
                 else // parent_of_pair != -1
                 {
                     //This points are obviously in the cycle
-                    proving.push_back(names_nodes_.GetInfo_NTO(parent_of_pair));
-                    proving.push_back(names_nodes_.GetInfo_NTO(pair));
-                    proving.push_back(names_nodes_.GetInfo_NTO(cur_node));
+                    proving.push_back (names_nodes_.GetInfo_NTO (parent_of_pair));
+                    proving.push_back (names_nodes_.GetInfo_NTO (pair));
+                    proving.push_back (names_nodes_.GetInfo_NTO (cur_node));
                     ////////////////////////////////////////////
 
                     //cheking for big cycle
                     while ((cur_node = nodes_parents[cur_node]) != parent_of_pair)
-                        proving.push_back(names_nodes_.GetInfo_NTO(cur_node));
+                        proving.push_back (names_nodes_.GetInfo_NTO (cur_node));
                 }
                 return proving;
             }
@@ -452,6 +402,54 @@ std::vector<int> MC::KGraph<T1 , T2>::ColorizeNodes_Component (int node)
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
+
+//Spanning tree
+template<typename T1 , typename T2>
+void MC::KGraph<T1 , T2>::DeleteEdge (int left , int right)
+{
+    std::array<int , 2> deleted_nodes =
+    { names_nodes_.GetInfo_OTN (left)
+    , names_nodes_.GetInfo_OTN (right) };
+
+    int cur_node = deleted_nodes.back ();
+    for (auto&& deleted_node : deleted_nodes)
+    {
+        for (auto&& iter = nbegin (deleted_node); iter != nend (); ++iter)
+        {
+            if (PairNode (iter.GetPosition ()) == cur_node) //find deleted
+            {
+                if (iter->prev_ == MCGraph::iterator_edge<T1>::NOT_FILLED)
+                    nodes_[iter->node_].next_ = iter->next_;
+                else
+                    edges_[iter->prev_].next_ = iter->next_;
+
+                if (iter->next_ == MCGraph::iterator_edge<T1>::NOT_FILLED)
+                    nodes_[iter->node_].prev_ = iter->prev_;
+                else
+                    edges_[iter->next_].prev_ = iter->prev_;
+
+                cur_node = deleted_node;
+                break;
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+
+template <class T1 , class T2>
+int MC::KGraph<T1 , T2>::GetPairNode (int node) const
+{
+    return names_nodes_.GetInfo_NTO (
+        (node % 2) ? edges_[node - 1].node_ : edges_[node + 1].node_
+    );
+}
 
 template <class T1 , class T2>
 int MC::KGraph<T1 , T2>::PairNode (int node) const
@@ -476,28 +474,28 @@ std::ostream& operator<<(std::ostream& out , const MC::KGraph<T1 , T2>& graph)
 //!Interface for ColorizeNodes
 
 template <class T1 , class T2>
-std::vector<std::pair<int , MCGraph::Color>> 
-MC::KGraph<T1 , T2>::GetColors()
+std::vector<std::pair<int , MCGraph::Color>>
+MC::KGraph<T1 , T2>::GetColors ()
 {
     if (is_colorized_ == bipar::NOT_CORRECT)
-        ColorizeNodes();
+        ColorizeNodes ();
 
     std::vector<std::pair<int , MCGraph::Color>> out;
-    out.reserve(nodes_.size ());
+    out.reserve (nodes_.size ());
 
     for (size_t i = 0; i < nodes_.size (); ++i)
-        out.emplace_back(names_nodes_.GetInfo_NTO(i), nodes_[i].color_);
-    
+        out.emplace_back (names_nodes_.GetInfo_NTO (i) , nodes_[i].color_);
+
     return out;
 }
 
 template <class T1 , class T2>
-bool MC::KGraph<T1, T2>::IsBipartite() 
+bool MC::KGraph<T1 , T2>::IsBipartite ()
 {
     if (is_colorized_ == bipar::NOT_CORRECT)
-        ColorizeNodes();
+        ColorizeNodes ();
 
-    switch(is_colorized_)
+    switch (is_colorized_)
     {
     case bipar::FALSE:
         return false;
@@ -513,7 +511,70 @@ bool MC::KGraph<T1, T2>::IsBipartite()
 }
 
 template <class T1 , class T2>
-std::vector<int> MC::KGraph<T1, T2>::ProveNotBipartite()
+std::vector<int> MC::KGraph<T1 , T2>::ProveNotBipartite ()
 {
-    return ColorizeNodes();
+    return ColorizeNodes ();
+}
+
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+//Iterator
+template <class T1 , class T2>
+MCGraph::const_iterator<T1 , T2> MC::KGraph<T1 , T2>::cbegin () const noexcept
+{
+    return MCGraph::const_iterator<T1 , T2>
+        (0 , &names_nodes_ , edges_.data () , nodes_.data ());
+}
+
+template <class T1 , class T2>
+MCGraph::const_iterator<T1 , T2> MC::KGraph<T1 , T2>::cend () const noexcept
+{
+    return MCGraph::const_iterator<T1 , T2>
+        (nodes_.size () , nullptr , nullptr , nullptr);
+}
+
+template <class T1 , class T2>
+MCGraph::const_iterator_edge<T1> MC::KGraph<T1 , T2>::cnbegin (int node) const noexcept
+{
+    return MCGraph::const_iterator_edge<T1>
+        (nodes_[names_nodes_.GetInfo_OTN (node)].next_ , edges_.data ());
+}
+template <class T1 , class T2>
+MCGraph::const_iterator_edge<T1> MC::KGraph<T1 , T2>::cnend () const noexcept
+{
+    return MCGraph::const_iterator_edge<T1>
+        (MCGraph::const_iterator_edge<T1>::NOT_FILLED , nullptr);
+}
+
+
+template <class T1 , class T2>
+MCGraph::iterator<T1 , T2> MC::KGraph<T1 , T2>::begin ()  noexcept
+{
+    return MCGraph::iterator<T1 , T2>
+        (0 , &names_nodes_ , edges_.data () , nodes_.data ());
+}
+
+template <class T1 , class T2>
+MCGraph::iterator<T1 , T2> MC::KGraph<T1 , T2>::end ()  noexcept
+{
+    return MCGraph::iterator<T1 , T2>
+        (nodes_.size () , nullptr , nullptr , nullptr);
+}
+
+template <class T1 , class T2>
+MCGraph::iterator_edge<T1> MC::KGraph<T1 , T2>::nbegin (int node) noexcept
+{
+    return MCGraph::iterator_edge<T1>
+        (nodes_[node].next_ , edges_.data ());
+}
+template <class T1 , class T2>
+MCGraph::iterator_edge<T1> MC::KGraph<T1 , T2>::nend () noexcept
+{
+    return MCGraph::iterator_edge<T1>
+        (MCGraph::iterator_edge<T1>::NOT_FILLED , nullptr);
 }

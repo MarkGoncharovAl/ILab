@@ -4,8 +4,16 @@
 # cmake ../ -DMAIN=ON -DGENERATE=ON -DCOMPARE=ON -DCOMPARE_PART=ON
 
 ### Содержание: ###
-1.  [Установка]()
-2.  [Интерфейс]()
+1. [Algorighmes]()
+1. [Установка]()
+2. [Интерфейс]()
+
+Algorithmes
+===========
+
+1. Native is simplest algorithm
+2. Native_GPU is too. But patterns are going in one time
+3. RabKar: first, we're getting hashes of buffer according to size of string
 
 Установка
 =========

@@ -12,12 +12,16 @@ std::vector<size_t> clM::RabKar::FindPatterns
     output.reserve (patterns.size ());
 
     cl::Buffer buffer_base = CreateBuffer (base);
+
+    //preparing hashes tables that will be compared
     auto&& hashes = PrepareHashOfBuffer (base , patterns , buffer_base);
 
     for (std::string& str : patterns)
     {
         //getting main number
         hash_type hash_pattern = HashFunction (str);
+
+        //getting current hash table
         auto&& base_hashes = hashes.find (str.size ());
         if (base_hashes == hashes.end ())
         {
@@ -27,6 +31,8 @@ std::vector<size_t> clM::RabKar::FindPatterns
 
         auto& check = base_hashes->second;
         size_t count = 0;
+
+        //comparing hashes
         for (size_t i = 0; i < check.size (); ++i)
         {
             if (check[i] == hash_pattern)
@@ -74,6 +80,8 @@ clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::string>& 
         if (current_hash_buffer == output.end ())
         {
             std::vector<hash_type> hash_buffer (*global_size);
+
+            //creating buffers for output hashes
             cl::Buffer cur_buffer (context_ , CL_MEM_READ_WRITE , hash_buffer.size () * sizeof (hash_type));
             queue_.enqueueWriteBuffer (cur_buffer , CL_TRUE , 0 , hash_buffer.size () * sizeof (hash_type) , hash_buffer.data ());
 
@@ -83,6 +91,7 @@ clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::string>& 
             kernel.setArg (2 , pattern_size);
             RunEvent (kernel , local_size , global_size);
 
+            //cheking hashes
             cl::copy (queue_ , cur_buffer , hash_buffer.begin () , hash_buffer.end ());
 
             output.insert (std::make_pair (pattern_size , std::move (hash_buffer)));
