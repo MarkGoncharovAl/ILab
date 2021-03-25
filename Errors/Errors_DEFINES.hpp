@@ -4,10 +4,8 @@
 #include <tuple>
 #include <fstream>
 #include <iomanip>
-#include <string_view>
 
-#define DEFAULT_LOG_FILE "debug.log" //because std::ofstream(constexpr can't be done)
-
+//out files, can be set in compiling
 
 namespace MLib_Error
 {

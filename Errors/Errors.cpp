@@ -5,15 +5,25 @@ namespace MLib_Error
     //Constructors
     ////////////////////////////////////
     ////////////////////////////////////
+    #ifndef LOG_FILE
     Logging::Logging () :
         size_file_ (15) ,
         size_line_ (4) ,
-        out_ (DEFAULT_LOG_FILE) ,
+        out_ ("debug.log") ,
         log_ (out_)
     {
         if (!out_.is_open ())
             throw std::runtime_error ("Can't create DEFAULT_LOG_FILE for logging");
     }
+
+    #else //LOG_FILE was set
+    Logging::Logging () :
+        size_file_ (15) ,
+        size_line_ (4) ,
+        out_ () ,
+        log_ (out_)
+    {}
+    #endif
 
     Log_stream::Log_stream (std::ofstream& out)
         : out_ (out)
