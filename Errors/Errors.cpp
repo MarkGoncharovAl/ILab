@@ -82,7 +82,7 @@ namespace MLib_Error
     //Logging
     ////////////////////////////////////
     ////////////////////////////////////
-    void Logging::ChangeDirectory (const std::string& file) throw()
+    void Logging::ChangeDirectory (const std::string& file)
     {
         if (file.empty ())
         {

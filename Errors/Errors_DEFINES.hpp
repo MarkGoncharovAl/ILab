@@ -44,7 +44,7 @@ namespace MLib_Error
         Log_stream& Log (const std::string& file , size_t line);
 
         // throwing exception std::runtime_error
-        void ChangeDirectory (const std::string& file) throw();
+        void ChangeDirectory (const std::string& file);
 
         void SetSize_NameFile (size_t new_size) noexcept;
         void SetSize_NameLine (size_t new_size) noexcept;

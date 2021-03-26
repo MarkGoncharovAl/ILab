@@ -14,6 +14,7 @@
 static std::string ReadBase (std::ifstream& file);
 static clM::RabKar_Strings ReadPatterns (std::ifstream& file);
 static std::vector<std::ifstream> OpenFilesIn (const std::string& folder);
+static bool IsExtensionTxt (const boost::filesystem::path& path);
 
 int main (int argc , char* argv [])
 {
@@ -60,6 +61,7 @@ int main (int argc , char* argv [])
             }
             if (everything_is_equal)
             {
+                std::cout << "EQUAL: faster ";
                 if (time_native <= time_check)
                     std::cout << "native in " << time_check / time_native << " times";
                 else
@@ -96,12 +98,14 @@ std::vector<std::ifstream> OpenFilesIn (const std::string& folder_name)
     }
 
     //folder exists
-    bfs::directory_iterator iter(folder), end;
+    bfs::directory_iterator iter (folder) , end;
     for (; iter != end; ++iter)
     {
-        if (bfs::is_regular_file (*iter))
+        if (bfs::is_regular_file (*iter)
+        && IsExtensionTxt (iter->path ()))
+        {
             out.push_back (std::ifstream { iter->path ().string () });
-        //std::cout << iter->path () << std::endl;
+        }
     }
 
     return out;
@@ -162,4 +166,9 @@ clM::RabKar_Strings ReadPatterns (std::ifstream& file)
     }
 
     return output;
+}
+
+static bool IsExtensionTxt (const boost::filesystem::path& path)
+{
+    return (boost::filesystem::extension (path) == ".txt");
 }

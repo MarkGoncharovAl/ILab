@@ -1,7 +1,7 @@
 #include "RabKar.hpp"
 
-clM::RabKar::RabKar (const cl::Device& device)
-    : OpenCL (device , "../RabKar/RabKar.cl")
+clM::RabKar::RabKar (const cl::Device& device) :
+    OpenCL (device , "../RabKar/RabKar.cl")
 {}
 
 
@@ -11,10 +11,10 @@ std::vector<size_t> clM::RabKar::FindPatterns
     std::vector<size_t> output;
     output.reserve (patterns.size ());
 
-    cl::Buffer buffer_base = CreateBuffer (base);
+    buffer_base = CreateBuffer (base);
 
     //preparing hashes tables that will be compared
-    auto&& hashes = PrepareHashOfBuffer (base , patterns , buffer_base);
+    PrepareHashOfBuffer (base , patterns);
 
     for (std::string& str : patterns)
     {
@@ -60,42 +60,59 @@ void clM::RabKar::HashEffect () const
     std::cout << "Hash found: " << Findings () << "%\n";
 }
 
-std::unordered_map
-< size_t , std::vector<clM::RabKar::hash_type> >
-clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::string>& patterns , cl::Buffer& buffer_base)
+void clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::string>& patterns)
 {
-    std::unordered_map
-        < size_t , std::vector<hash_type> > output;
-
-    cl::Kernel kernel (program_ , "PrepareHashOfBuffer");
-    cl::NDRange local_size = 1;
+    std::vector<std::thread> threads;
 
     for (const std::string& str : patterns)
     {
         const size_t pattern_size = str.size ();
-        cl::NDRange global_size = base.size () - pattern_size + 1;
+        size_t global_size = base.size () - pattern_size + 1;
 
         //creating hashes for base string
-        auto&& current_hash_buffer = output.find (pattern_size);
-        if (current_hash_buffer == output.end ())
+        auto&& current_hash_buffer = hashes.find (pattern_size);
+        if (current_hash_buffer == hashes.end ())
         {
-            std::vector<hash_type> hash_buffer (*global_size);
+            /*
+            We have to push hashes into the table:
 
-            //creating buffers for output hashes
-            cl::Buffer cur_buffer (context_ , CL_MEM_READ_WRITE , hash_buffer.size () * sizeof (hash_type));
-            queue_.enqueueWriteBuffer (cur_buffer , CL_TRUE , 0 , hash_buffer.size () * sizeof (hash_type) , hash_buffer.data ());
+            1) reserve place in order to get
+            information, what threads are used
+            */
+            hashes.insert (std::make_pair (pattern_size , std::vector<hash_type>{}));
 
-            //writting hashes into array
-            kernel.setArg (0 , buffer_base);
-            kernel.setArg (1 , cur_buffer);
-            kernel.setArg (2 , pattern_size);
-            RunEvent (kernel , local_size , global_size);
-
-            //cheking hashes
-            cl::copy (queue_ , cur_buffer , hash_buffer.begin () , hash_buffer.end ());
-
-            output.insert (std::make_pair (pattern_size , std::move (hash_buffer)));
+            // start thread:
+            std::thread cur_thread ( GetVecHashes, this, pattern_size, global_size);
+            threads.push_back(std::move(cur_thread));
         }
     }
-    return output;
+
+    for (auto&& thread : threads)
+        thread.join();
+}
+
+void clM::RabKar::GetVecHashes (RabKar* pointer, size_t pattern_size , size_t global_size)
+{
+    std::vector<hash_type> hash_buffer (global_size);
+
+    //creating buffers for output hashes
+    cl::Buffer cur_buffer (pointer->context_ , CL_MEM_READ_WRITE , hash_buffer.size () * sizeof (hash_type));
+    pointer->queue_.enqueueWriteBuffer (cur_buffer , CL_TRUE , 0 , hash_buffer.size () * sizeof (hash_type) , hash_buffer.data ());
+
+    cl::Kernel kernel(pointer->program_, "PrepareHashOfBuffer");
+
+    //writting hashes into array
+    kernel.setArg (0 , pointer->buffer_base);
+    kernel.setArg (1 , cur_buffer);
+    kernel.setArg (2 , pattern_size);
+    pointer->RunEvent (kernel , cl::NDRange{1} , global_size);
+
+    //cheking hashes
+    cl::copy (pointer->queue_ , cur_buffer , hash_buffer.begin () , hash_buffer.end ());
+
+    //DANGER ZONE
+    pointer->mutex_.lock();
+    if (pointer->hashes.insert_or_assign (pattern_size , std::move (hash_buffer)).second == true)
+        std::cout << "AAAAAA";
+    pointer->mutex_.unlock();
 }

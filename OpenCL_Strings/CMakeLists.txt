@@ -19,17 +19,11 @@ find_package(Boost COMPONENTS system filesystem REQUIRED)
 option(MAIN "adding main" ON)
 option(GENERATE "generating tests" OFF)
 option(COMPARE "comparing every tests" OFF)
-option(COMPARE_PART "comparing every tests" OFF)
-#option(TEST "adding google tests" OFF)
-#option(E2E "adding full_tests" OFF)
 
-#add_subdirectory(BSort)
 add_subdirectory(MC_OpenCL)
 add_subdirectory(NativeAlg)
 add_subdirectory(NativeAlg_GPU)
 add_subdirectory(RabKar)
-#add_subdirectory(Common_libs/Random)
-#add_subdirectory(Common_libs/Time)
 
 if (MAIN)
     message("Building main")
@@ -46,6 +40,7 @@ if (MAIN)
         Boost::program_options
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
+        Threads::Threads
     )
 endif(MAIN)
 
@@ -69,22 +64,6 @@ if (COMPARE)
         Boost::program_options
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
+        Threads::Threads
     )
 endif(COMPARE)
-if (COMPARE_PART)
-    message("Building comparing")
-    add_executable(compare_part comparing_part.cpp)
-    target_link_libraries (
-        compare_part    
-    
-        MC_OpenCL
-        NativeAlg
-        NativeAlg_GPU
-        RabKar
-
-        ${OpenCL_LIBRARY}
-        Boost::program_options
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-    )
-endif(COMPARE_PART)

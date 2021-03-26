@@ -7,12 +7,10 @@
 int main ()
 {
     constexpr size_t size_files = 6;
-    constexpr size_t count = (1 << 15);
-    constexpr size_t tests = (1 << 15) ;
-    MLib::Random rand_small (57 , 60); //ranges of random
-    MLib::Random rand_middle (45 , 60);
-    MLib::Random rand_big (40 , 100);
-    size_t size_test = 16;
+    constexpr size_t count = (1 << 12);
+    constexpr size_t tests = (1 << 12) ;
+    MLib::Random rand_small (58 , 60); //ranges of random
+    MLib::Random rand_size(4, 8);
 
     //openening files
     std::array<std::ofstream , size_files> files;
@@ -25,7 +23,6 @@ int main ()
         ++cur_file;
     }
 
-    //!Small tests
     for (size_t i = 0; i < size_files; ++i)
     {
         //size
@@ -43,6 +40,7 @@ int main ()
         //patterns
         for (size_t k = 0; k < tests; ++k)
         {
+            size_t size_test = rand_size.get ();
             files[i] << size_test << " ";
             for (size_t j = 0; j < size_test; ++j)
                 files[i] << static_cast<char>(rand_small.get ());
@@ -50,7 +48,6 @@ int main ()
             files[i] << "\n";
         }
 
-        size_test <<= 1;
         files[i].close();
     }
 }
