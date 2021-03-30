@@ -1,16 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include "Common_libs/Random.hpp"
-#include "Common_libs/Errors.hpp"
+#include "Common_libs/Errors/Errors.hpp"
 #include <array>
 
 int main ()
 {
     constexpr size_t size_files = 6;
     constexpr size_t count = (1 << 12);
-    constexpr size_t tests = (1 << 12) ;
+    constexpr size_t tests = (1 << 15) ;
     MLib::Random rand_small (58 , 60); //ranges of random
-    MLib::Random rand_size(4, 8);
+    MLib::Random rand_size(30, 100);
 
     //openening files
     std::array<std::ofstream , size_files> files;
@@ -19,7 +19,9 @@ int main ()
     {
         file = std::ofstream { std::string ("../TESTS/") + std::to_string (cur_file) + ".txt" };
         if (!file.is_open ())
-            ERROR ("File wasn't opened!");
+        {
+            LOG_fatal << "File " << cur_file << " wasn't opened!";
+        }
         ++cur_file;
     }
 

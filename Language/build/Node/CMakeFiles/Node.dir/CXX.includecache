@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mark/VS_prog/ILab/Language/Common_libs/errors.hpp
+iostream
+-
+
+/home/mark/VS_prog/ILab/Language/Node/INode.hpp
+
+/home/mark/VS_prog/ILab/Language/Node/Node.cpp
+Node.hpp
+/home/mark/VS_prog/ILab/Language/Node/Node.hpp
+Symtab.hpp
+/home/mark/VS_prog/ILab/Language/Node/Symtab.hpp
+../Common_libs/errors.hpp
+/home/mark/VS_prog/ILab/Language/Common_libs/errors.hpp
+
+/home/mark/VS_prog/ILab/Language/Node/Node.hpp
+iostream
+-
+map
+-
+string
+-
+typeinfo
+-
+vector
+-
+INode.hpp
+/home/mark/VS_prog/ILab/Language/Node/INode.hpp
+
+/home/mark/VS_prog/ILab/Language/Node/Symtab.hpp
+string
+-
+unordered_map
+-
+INode.hpp
+/home/mark/VS_prog/ILab/Language/Node/INode.hpp
+

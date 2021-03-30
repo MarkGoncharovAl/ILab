@@ -1,20 +1,12 @@
 #pragma once
 #include <iostream>
 
-static constexpr size_t GetMaxSize() 
-{
-    size_t max_size = 0xff;
-    for (char i = 0; i < 49; ++i)
-        max_size = (max_size << 8) + 0xff;
-    return max_size;
-}
-
 namespace clM
 {
     class Hash_RabKar
     {
     public:
-        using hash_type = size_t;
+        using hash_type = unsigned int;
         //1) move + copy ctor
         //2) operator ==()
 
@@ -23,10 +15,11 @@ namespace clM
         bool LastCompare (const char* lhs , const char* rhs , size_t size);
         double Findings () const noexcept;
 
-        virtual ~Hash_RabKar() {};
+        virtual ~Hash_RabKar () {};
 
     private:
-        static constexpr size_t max_size_ = GetMaxSize();
+        hash_type increase_ = 31;
+        hash_type module_ = (1 << 25);
 
         double found = 0;
         double all = 0;

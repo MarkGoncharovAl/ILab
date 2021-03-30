@@ -1,0 +1,14 @@
+/home/mark/VS_prog/ILab/Language/build/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Language/build/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Language/build/CMakeFiles/main.dir
+/home/mark/VS_prog/ILab/Language/build/Node/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Language/build/Node/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Language/build/Node/CMakeFiles/Symtab.dir
+/home/mark/VS_prog/ILab/Language/build/Node/CMakeFiles/Node.dir
+/home/mark/VS_prog/ILab/Language/build/Grammar/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Language/build/Grammar/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Language/build/Grammar/CMakeFiles/parser.dir
+/home/mark/VS_prog/ILab/Language/build/Common_libs/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Language/build/Common_libs/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Language/build/Common_libs/CMakeFiles/random.dir
+/home/mark/VS_prog/ILab/Language/build/Common_libs/CMakeFiles/errors.dir

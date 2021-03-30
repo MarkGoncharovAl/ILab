@@ -7,15 +7,14 @@ clM::OpenCL::OpenCL (const cl::Device& device , const std::string& kernel_file)
 {
     if (device_ == cl::Device {})
     {
-        WARNING ("Can't create data from cl::Device{}\n");
+        LOG_error << "Can't create data from cl::Device{}\n";
         throw std::invalid_argument ("bad device!");
     }
 
     context_ = cl::Context { device_ };
     queue_ = cl::CommandQueue { context_, device_, CL_QUEUE_PROFILING_ENABLE };
 
-    std::string data_file = clMFunc::ReadFromFile (kernel_file);
-    program_ = cl::Program (context_ , data_file , true);
+    program_ = cl::Program (context_ , kernel_file , true);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -27,26 +26,26 @@ clM::OpenCL::OpenCL (const cl::Device& device , const std::string& kernel_file)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-void clM::CheckReturnError (cl_int err , const char* file , size_t line)
+void clM::CheckReturnError (cl_int err)
 {
     switch (err)
     {
     case CL_SUCCESS:
         break;
     case CL_INVALID_VALUE:
-        MLib::print_error ("INVALID VALUE" , file , line);
+        LOG_fatal << "INVALID VALUE: " << err;
         break;
     case CL_INVALID_DEVICE:
-        MLib::print_error ("INVALID DEVICE" , file , line);
+        LOG_fatal << "INVALID DEVICE: " << err;
         break;
     case CL_OUT_OF_HOST_MEMORY:
-        MLib::print_error ("OUT_OF_HOST_MEMORY" , file , line);
+        LOG_fatal << "OUT_OF_HOST_MEMORY: " << err;
         break;
     case CL_OUT_OF_RESOURCES:
-        MLib::print_error ("OUT_OF_RESOURCES" , file , line);
+        LOG_fatal << "OUT_OF_RESOURCES: " << err;
         break;
     default:
-        MLib::print_error ("WEIRD MISTAKE IN CHECKING ERROR" , file , line);
+        LOG_fatal << "WEIRD MISTAKE IN CHECKING ERROR: " << err;
         break;
     }
 }
@@ -54,13 +53,9 @@ void clM::CheckReturnError (cl_int err , const char* file , size_t line)
 cl::Device clM::ChooseDevice (int argc , char* argv [])
 {
     if (argc == 1)
-    {
-        std::cout << "You should choose device!\n"
-            << "To view help write --help\n";
-        return cl::Device {};
-    }
+        std::cout << "Default device 0\n";
 
-    //argc > 1
+
     auto&& devices = clMFunc::GetDevices ();
     try
     {
@@ -99,14 +94,25 @@ cl::Device clM::ChooseDevice (int argc , char* argv [])
             return devices[num].second;
         }
 
-        //nothing was changed!
+        if (argc == 1)
+        {
+            std::cout << "\nDevice " << 0 << " was set:\n";
+            std::cout << "Platform:\t";
+            std::cout << devices[0].first.getInfo<CL_PLATFORM_NAME> () << "\n";
+            std::cout << "Device:\t\t";
+            std::cout << devices[0].second.getInfo<CL_DEVICE_NAME> () << "\n\n";
+            return devices[0].second;
+        }
+
+        //weird case
         std::cout << desc << "\n";
+        LOG_warning << "Can't translate command line arguments";
         return cl::Device {};
 
     }
     catch (std::exception& err)
     {
-        WARNING ("Mistake in cheking arguments!");
+        LOG_error << "Mistake in cheking arguments: " << err.what();
         throw err;
     }
 }
@@ -156,13 +162,4 @@ clMFunc::GetDevices ()
     }
 
     return output;
-}
-
-std::string clMFunc::ReadFromFile (const std::string& file)
-{
-    std::ifstream file_stream (file);
-    if (!file_stream.is_open ())
-        throw std::runtime_error ("Can't find file: \"" + file + "\"");
-
-    return std::string { std::istreambuf_iterator<char>{file_stream}, std::istreambuf_iterator<char>{} };
 }

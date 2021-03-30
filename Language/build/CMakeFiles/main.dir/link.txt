@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O3   CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/Lexer/lex.yy.cc.o CMakeFiles/main.dir/Grammar/parser.tab.cc.o  -o main  Node/libNode.a Node/libSymtab.a Grammar/libparser.a Common_libs/liberrors.a 

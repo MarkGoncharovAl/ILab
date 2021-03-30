@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mark/VS_prog/ILab/Language/Grammar/parser.cpp
+parser.hpp
+/home/mark/VS_prog/ILab/Language/Grammar/parser.hpp
+
+/home/mark/VS_prog/ILab/Language/Grammar/parser.hpp
+FlexLexer.h
+-
+iostream
+-
+string
+-
+../Node/INode.hpp
+/home/mark/VS_prog/ILab/Language/Node/INode.hpp
+parser.tab.hh
+/home/mark/VS_prog/ILab/Language/Grammar/parser.tab.hh
+
+/home/mark/VS_prog/ILab/Language/Grammar/parser.tab.hh
+string
+-
+../Node/INode.hpp
+/home/mark/VS_prog/ILab/Language/Node/INode.hpp
+cstdlib
+-
+iostream
+-
+stdexcept
+-
+string
+-
+vector
+-
+cassert
+-
+
+/home/mark/VS_prog/ILab/Language/Node/INode.hpp
+

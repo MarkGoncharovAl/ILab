@@ -21,7 +21,7 @@ clM::Hash_RabKar::HashFunction(const std::string& str)
     hash_type hash = 1; //start_value
 
     for (char symbol : str)
-        hash = ((hash << 4) + symbol) % (1 << 31);
+        hash = ((hash * increase_) + symbol) % module_;
     return hash;
 }
 

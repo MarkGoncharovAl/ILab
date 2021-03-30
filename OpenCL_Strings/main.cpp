@@ -3,7 +3,6 @@
 #include <fstream>
 #include <cmath>
 
-#include "Common_libs/Errors.hpp"
 #include "Common_libs/Time.hpp"
 
 #include "NativeAlg/NativeAlg.hpp"
@@ -17,49 +16,58 @@ int main (int argc , char* argv [])
 {
     cl::Device device = clM::ChooseDevice (argc , argv);
     if (device == cl::Device {})
+    {
+        LOG_warning << "Ending programm - device wasn't chosen";
         return 0;
+    }
+    LOG_trace << "device has been chosen";
 
     std::string base = ReadBase ();
     auto&& patterns = ReadPatterns ();
-    auto&& patterns_vector = patterns.VecStrings();
+    auto&& patterns_vector = patterns.VecStrings ();
 
     try
     {
         clM::RabKar rabkar (device);
 
         MLib::Time time;
-        
-        time.Reset();
-        auto&& native = MLib::FindStrings (base , patterns_vector);
-        auto&& cur_time = time.GetAndResetTime().count();
-        std::cout << "Native: " << cur_time << std::endl;
-        
-        time.Reset();
-        auto&& check = rabkar.FindPatterns (base , patterns_vector);
-        cur_time = time.GetAndResetTime().count();
-        std::cout << "Rabkar: " << cur_time << std::endl;
-        
-        rabkar.HashEffect();
 
+        LOG_trace << "Starting algorithm";
+        time.Reset ();
+        auto&& native = MLib::FindStrings (base , patterns_vector);
+        //auto&& cur_time = time.GetAndResetTime ().count ();
+        //std::cout << "Native: " << cur_time << std::endl;
+
+        time.Reset ();
+        auto&& check = rabkar.FindPatterns (base , patterns_vector);
+        //cur_time = time.GetAndResetTime ().count ();
+        //std::cout << "Rabkar: " << cur_time << std::endl;
+        //std::cout << "Time in GPU: " << rabkar.GetKernelTime() << std::endl;
+
+        LOG_trace << "Starting checking asnwers";
         for (size_t i = 0; i < native.size (); ++i)
         {
             //std::cout << native[i] << std::endl;
             if (check[i] != native[i])
             {
-                std::cout << "Not Equal: " << std::to_string (i)
-                << std::endl;
-                std::cout << native[i] << " : " << check[i] << std::endl;
+                std::cout << "NOT Equal: TEST: " << std::to_string (i)
+                    << " : Native: ";
+                std::cout << native[i] << ", Rabkar: " << check[i] << std::endl;
+            }
+            else //equal
+            {
+                std::cout << i + 1 << " " << check[i] << "\n";
             }
         }
     }
     catch (cl::Error& err)
     {
-        std::cerr << err.what () << std::endl;
-        clM::CheckErr (err.err ());
+        LOG_fatal << err.what();
+        clM::CheckReturnError (err.err ());
     }
     catch (std::exception& err)
     {
-        std::cerr << err.what () << std::endl;
+        LOG_fatal << err.what ();
     }
 
     return 0;
@@ -84,6 +92,7 @@ std::string ReadBase ()
     if (!std::cin.good ())
         throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
 
+    LOG_debug << "Reading base was correct";
     return out;
 }
 
@@ -116,8 +125,9 @@ clM::RabKar_Strings ReadPatterns ()
         if (!std::cin.good ())
             throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
 
-        output.AddString(std::move(out));
+        output.AddString (std::move (out));
     }
 
+    LOG_debug << "Reading patterns was correct";
     return output;
 }

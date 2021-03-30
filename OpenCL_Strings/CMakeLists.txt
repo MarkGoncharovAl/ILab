@@ -24,6 +24,7 @@ add_subdirectory(MC_OpenCL)
 add_subdirectory(NativeAlg)
 add_subdirectory(NativeAlg_GPU)
 add_subdirectory(RabKar)
+add_subdirectory(Common_libs/Errors)
 
 if (MAIN)
     message("Building main")
@@ -41,12 +42,17 @@ if (MAIN)
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         Threads::Threads
+        Errors
     )
 endif(MAIN)
 
 if (GENERATE)
     message("Building generating_tests")
     add_executable(generating generating_tests.cpp)
+    target_link_libraries(
+        generating
+        Errors
+    )
 endif(GENERATE)
 
 if (COMPARE)
@@ -65,5 +71,6 @@ if (COMPARE)
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         Threads::Threads
+        Errors
     )
 endif(COMPARE)

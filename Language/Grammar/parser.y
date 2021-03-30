@@ -1,9 +1,13 @@
 %language "c++"
-
 %skeleton "lalr1.cc"
+
 %defines
 %define api.value.type variant
+%define parse.error custom
 %param {yy::driver_t* driver}
+
+%locations 
+
 %code requires
 {
 #include <string>
@@ -18,7 +22,7 @@ namespace yy { class driver_t; }
 {
 #include "../Grammar/parser.hpp"
 INode::IScope_t* cur_scope = INode::CreateScope();
-namespace yy {parser::token_type yylex(parser::semantic_type* yylval, driver_t* driver);}
+namespace yy {parser::token_type yylex(parser::semantic_type* yylval, driver_t* driver, parser::location_type* l, driver_t* driver);}
 }
 
 %token <double> DOUBLE
@@ -199,8 +203,18 @@ OUTPUT math_expr SCOLON
 %%
 
 namespace yy {
-parser::token_type yylex(parser::semantic_type* yylval, driver_t* driver) {return driver->yylex(yylval);
-}
+        parser::token_type yylex(parser::semantic_type* yylval, driver_t* driver) 
+        {
+                return driver->yylex(yylval);
+        }
 
-void parser::error(const std::string& s) {std::cout << s << std::endl;}
+        void parser::error(const parser::location_type& l, const std::string& message) 
+        {
+                LOG_error << message;
+        }
+
+        void parser::report_syntax_error(const parser::context& ctx) const 
+        {
+                driver->report_syntax_error(ctx);
+        }
 }

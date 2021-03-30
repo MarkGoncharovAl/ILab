@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSymtab.a  CMakeFiles/Symtab.dir/Symtab.cpp.o
+/usr/bin/ranlib libSymtab.a

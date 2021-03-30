@@ -27,7 +27,7 @@ namespace clM
     private:
         void RunEvent (const cl::Kernel& kernel ,
                        const cl::NDRange& loc_sz ,
-                       const cl::NDRange& glob_sz) override;
+                       const cl::NDRange& glob_sz);
     };
 }
 

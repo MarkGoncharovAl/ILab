@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
-#include "../Common_libs/Errors.hpp"
+#include "../Common_libs/Errors/Errors.hpp"
 
 #define CL_HPP_ENABLE_EXCEPTIONS
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
@@ -12,8 +12,7 @@
 
 namespace clM
 {
-    void CheckReturnError (cl_int err , const char* file , size_t line);
-#define CheckErr(a) CheckReturnError(a, __FILE__, __LINE__)
+    void CheckReturnError (cl_int err);
 
     cl::Device ChooseDevice (int agrc , char* argv []);
 
@@ -23,10 +22,6 @@ namespace clM
     public:
         OpenCL (const cl::Device& device , const std::string& kernel_file);
         virtual ~OpenCL () {}
-
-        virtual void RunEvent (const cl::Kernel& kernel ,
-                               const cl::NDRange& loc_sz ,
-                               const cl::NDRange& glob_sz) = 0;
 
         //Container MUST have:
         //1) size
@@ -47,15 +42,12 @@ namespace clMFunc
 {
     using Devices_t = std::vector<std::pair<cl::Platform , cl::Device>>;
     Devices_t GetDevices ();
-
-    //using for reading from kernel file
-    std::string ReadFromFile (const std::string& file);
 }
 
 template <typename Container>
 cl::Buffer clM::OpenCL::CreateBuffer (Container& cont)
 {
     cl::Buffer output (context_ , CL_MEM_READ_WRITE , cont.size () * sizeof (cont.front()));
-    queue_.enqueueWriteBuffer (output , CL_TRUE , 0 , cont.size () , cont.data ());
+    queue_.enqueueWriteBuffer (output , CL_TRUE , 0 , cont.size () * sizeof (cont.front()), cont.data ());
     return output;
 }

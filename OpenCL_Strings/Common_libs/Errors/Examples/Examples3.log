@@ -1,0 +1,6 @@
+
+FATAL File[Examples3.cpp] Line[14] fatal_message
+ERROR File[Examples3.cpp] Line[15] error_message
+WARN  File[Examples3.cpp] Line[16] warning_message
+debug File[Examples3.cpp] Line[17] debug_message
+trace File[Examples3.cpp] Line[18] trace_message

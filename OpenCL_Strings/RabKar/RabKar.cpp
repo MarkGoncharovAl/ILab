@@ -1,7 +1,13 @@
 #include "RabKar.hpp"
 
+#include "kernel.hpp"
+#include "../Common_libs/Time.hpp"
+
 clM::RabKar::RabKar (const cl::Device& device) :
-    OpenCL (device , "../RabKar/RabKar.cl")
+    OpenCL (device , kernel_file) ,
+    event_data_ () ,
+    buffer_base_ () ,
+    gpu_time_ (0)
 {}
 
 
@@ -11,11 +17,12 @@ std::vector<size_t> clM::RabKar::FindPatterns
     std::vector<size_t> output;
     output.reserve (patterns.size ());
 
-    buffer_base = CreateBuffer (base);
+    buffer_base_ = CreateBuffer (base);
 
     //preparing hashes tables that will be compared
-    PrepareHashOfBuffer (base , patterns);
+    auto&& hashes = PrepareHashOfBuffer (base , patterns);
 
+    MLib::Time time;
     for (std::string& str : patterns)
     {
         //getting main number
@@ -25,7 +32,7 @@ std::vector<size_t> clM::RabKar::FindPatterns
         auto&& base_hashes = hashes.find (str.size ());
         if (base_hashes == hashes.end ())
         {
-            WARNING ("Hash " + std::to_string (str.size ()) + " wasn't prepared!");
+            LOG_warning << "Hash " << str.size () << " wasn't prepared!";
             continue;
         }
 
@@ -42,17 +49,9 @@ std::vector<size_t> clM::RabKar::FindPatterns
 
         output.emplace_back (count);
     }
+    compare_ = time.Get().count ();
 
     return output;
-}
-
-void clM::RabKar::RunEvent (const cl::Kernel& kernel ,
-                            const cl::NDRange& loc_sz ,
-                            const cl::NDRange& glob_sz)
-{
-    cl::Event event;
-    queue_.enqueueNDRangeKernel (kernel , 0 , glob_sz , loc_sz , nullptr , &event);
-    event.wait ();
 }
 
 void clM::RabKar::HashEffect () const
@@ -60,9 +59,10 @@ void clM::RabKar::HashEffect () const
     std::cout << "Hash found: " << Findings () << "%\n";
 }
 
-void clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::string>& patterns)
+clM::RabKar::PrepareHashOfBuffer_t
+clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::string>& patterns)
 {
-    std::vector<std::thread> threads;
+    PrepareHashOfBuffer_t hashes;
 
     for (const std::string& str : patterns)
     {
@@ -73,46 +73,63 @@ void clM::RabKar::PrepareHashOfBuffer (std::string& base , std::vector<std::stri
         auto&& current_hash_buffer = hashes.find (pattern_size);
         if (current_hash_buffer == hashes.end ())
         {
-            /*
-            We have to push hashes into the table:
+            //Preparing hash table
+            std::vector<hash_type> hash_buffer (global_size);
 
-            1) reserve place in order to get
-            information, what threads are used
-            */
-            hashes.insert (std::make_pair (pattern_size , std::vector<hash_type>{}));
+            //the same vector, but now pushed
+            std::vector<hash_type>& new_hash_buffer =
+                hashes.insert (std::make_pair (pattern_size , std::move (hash_buffer))).first->second;
 
-            // start thread:
-            std::thread cur_thread ( GetVecHashes, this, pattern_size, global_size);
-            threads.push_back(std::move(cur_thread));
+            //filling tables of hashes
+            GetVecHashes (pattern_size , global_size , new_hash_buffer);
         }
     }
 
-    for (auto&& thread : threads)
-        thread.join();
+    /*
+    In this step we have filled queue (called event_data_)
+    Now we must copy data from GPU
+    */
+    CopyDataFromGPU ();
+    return hashes;
 }
 
-void clM::RabKar::GetVecHashes (RabKar* pointer, size_t pattern_size , size_t global_size)
+void clM::RabKar::CopyDataFromGPU ()
 {
-    std::vector<hash_type> hash_buffer (global_size);
+    while (!event_data_.empty ())
+    {
+        //copying every event
+        gpu_time_ += event_data_.front ().CopyDataFromGPU (queue_);
+        event_data_.pop ();
+    }
+}
 
+void clM::RabKar::GetVecHashes (size_t pattern_size , size_t global_size , std::vector<hash_type>& hash_buffer)
+{
     //creating buffers for output hashes
-    cl::Buffer cur_buffer (pointer->context_ , CL_MEM_READ_WRITE , hash_buffer.size () * sizeof (hash_type));
-    pointer->queue_.enqueueWriteBuffer (cur_buffer , CL_TRUE , 0 , hash_buffer.size () * sizeof (hash_type) , hash_buffer.data ());
-
-    cl::Kernel kernel(pointer->program_, "PrepareHashOfBuffer");
+    cl::Buffer cur_buffer = CreateBuffer (hash_buffer);
+    cl::Kernel kernel (program_ , "PrepareHashOfBuffer");
 
     //writting hashes into array
-    kernel.setArg (0 , pointer->buffer_base);
+    kernel.setArg (0 , buffer_base_);
     kernel.setArg (1 , cur_buffer);
     kernel.setArg (2 , pattern_size);
-    pointer->RunEvent (kernel , cl::NDRange{1} , global_size);
+    EventWaiter waiter { hash_buffer, std::move (cur_buffer) };
+    queue_.enqueueNDRangeKernel (kernel , 0 , global_size , cl::NDRange { 1 } , nullptr , waiter.GetEvent ());
 
-    //cheking hashes
-    cl::copy (pointer->queue_ , cur_buffer , hash_buffer.begin () , hash_buffer.end ());
+    event_data_.push (std::move (waiter));
+}
 
-    //DANGER ZONE
-    pointer->mutex_.lock();
-    if (pointer->hashes.insert_or_assign (pattern_size , std::move (hash_buffer)).second == true)
-        std::cout << "AAAAAA";
-    pointer->mutex_.unlock();
+clM::RabKar::EventWaiter::EventWaiter (std::vector<hash_type>& hash , cl::Buffer buffer) :
+    hash_ (hash) ,
+    buffer_ (buffer) ,
+    event_ ()
+{}
+
+double clM::RabKar::EventWaiter::CopyDataFromGPU (cl::CommandQueue& queue)
+{
+    event_.wait ();
+    cl::copy (queue , buffer_ , hash_.begin () , hash_.end ());
+
+    return (static_cast<double>
+    (event_.getProfilingInfo<CL_PROFILING_COMMAND_END> () - event_.getProfilingInfo<CL_PROFILING_COMMAND_START> ()) / 1000.0);
 }

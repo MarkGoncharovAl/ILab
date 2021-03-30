@@ -1,20 +1,26 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <fstream>
 #include <cmath>
 #include <boost/filesystem.hpp>
 
-#include "Common_libs/Errors.hpp"
 #include "Common_libs/Time.hpp"
+#include "Common_libs/Errors/Errors.hpp"
+#include "Common_libs/Table.hpp"
 
 #include "NativeAlg/NativeAlg.hpp"
 #include "NativeAlg_GPU/NativeAlg_GPU.hpp"
 #include "RabKar/RabKar.hpp"
 
+using CUR_TABLE = MLib::Table_h<double , 6>;
+
 static std::string ReadBase (std::ifstream& file);
 static clM::RabKar_Strings ReadPatterns (std::ifstream& file);
 static std::vector<std::ifstream> OpenFilesIn (const std::string& folder);
 static bool IsExtensionTxt (const boost::filesystem::path& path);
+static CUR_TABLE PrepareTable ();
+static void AddToTable (CUR_TABLE& table , const clM::RabKar& alg , double native , double rabkar);
 
 int main (int argc , char* argv [])
 {
@@ -24,7 +30,7 @@ int main (int argc , char* argv [])
 
     //preparing files
     auto&& files = OpenFilesIn ("../TESTS");
-    std::cout << "|Native\t\t|RabKar\t\t|\n";
+    auto&& table = PrepareTable ();
 
     for (auto&& file : files)
     {
@@ -40,14 +46,13 @@ int main (int argc , char* argv [])
             time.Reset ();
             auto&& native = MLib::FindStrings (base , patterns_vector);
             double time_native = time.GetAndResetTime ().count ();
-            std::cout << "|" << time_native << "\t\t|";
 
             time.Reset ();
             auto&& check = rabkar.FindPatterns (base , patterns_vector);
             double time_check = time.GetAndResetTime ().count ();
-            std::cout << time_check << "\t\t|";
 
-            bool everything_is_equal = true;
+            AddToTable (table , rabkar , time_native , time_check);
+
             for (size_t i = 0; i < native.size (); ++i)
             {
                 //std::cout << native[i] << std::endl;
@@ -56,32 +61,24 @@ int main (int argc , char* argv [])
                     std::cout << "\nNot Equal: " << std::to_string (i)
                         << std::endl;
                     std::cout << native[i] << " : " << check[i];
-                    everything_is_equal = false;
+                    std::cout << std::endl;
                 }
             }
-            if (everything_is_equal)
-            {
-                std::cout << "EQUAL: faster ";
-                if (time_native <= time_check)
-                    std::cout << "native in " << time_check / time_native << " times";
-                else
-                    std::cout << "rabkar in " << time_native / time_check << " times";
-            }
 
-            std::cout << std::endl;
             file.close ();
         }
         catch (cl::Error& err)
         {
-            std::cerr << err.what () << std::endl;
-            clM::CheckErr (err.err ());
+            LOG_fatal << err.what ();
+            clM::CheckReturnError (err.err ());
         }
         catch (std::exception& err)
         {
-            std::cerr << err.what () << std::endl;
+            LOG_fatal << err.what ();
         }
 
     }
+    table.Print ();
     return 0;
 }
 
@@ -93,7 +90,7 @@ std::vector<std::ifstream> OpenFilesIn (const std::string& folder_name)
     bfs::path folder { folder_name };
     if (!bfs::exists (folder))
     {
-        WARNING (std::string ("Can't find folder ") + folder_name);
+        LOG_warning << "Can't find folder " << folder_name;
         return out;
     }
 
@@ -168,7 +165,37 @@ clM::RabKar_Strings ReadPatterns (std::ifstream& file)
     return output;
 }
 
-static bool IsExtensionTxt (const boost::filesystem::path& path)
+bool IsExtensionTxt (const boost::filesystem::path& path)
 {
     return (boost::filesystem::extension (path) == ".txt");
+}
+
+CUR_TABLE PrepareTable ()
+{
+    CUR_TABLE table;
+    table.spaces_ = 10;
+    table.header_[0] = "NATIVE";
+    table.header_[1] = "PREPARING";
+    table.header_[2] = "GPU_TIME";
+    table.header_[3] = "COMPARING";
+    table.header_[4] = "FASTER";
+    table.header_[5] = "TIMES";
+    return table;
+}
+
+void AddToTable (CUR_TABLE& table , const clM::RabKar& alg , double native , double rabkar)
+{
+    double faster = (native < rabkar) ? 0 : 1;
+    double faster_times = (native > rabkar)
+        ? native / rabkar
+        : rabkar / native;
+
+    table.data_.push_back (std::array<double , 6>
+    {       native ,
+            rabkar - alg.GetKernelTime () - alg.GetCompareTime () ,
+            alg.GetKernelTime () ,
+            alg.GetCompareTime () ,
+            faster ,
+            faster_times
+    });
 }
