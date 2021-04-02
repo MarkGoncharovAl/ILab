@@ -1,37 +1,56 @@
-# Using of OpenCL - Bitonic Sort #
+# Bitonic Sorting #
 ### Author: Goncharov Mark (EverRest) ###
 
 ### Содержание: ###
-1.  [Установка]()
-2.  [Интерфейс]()
+1. Task
+2. Algorithm
+3. Installing
+4. Using
 
-Установка
+Task
+====
+##### Level 1: Fast sorting
+
+Input: ```size``` of vector. Then waiting ```size``` elements.
+
+Output: sorting array 
+
+The main target is to accelerate sorting on GPU and be faster than std::sort. We used this type of sorting in order to get more parallel power.
+
+Algorithm
+===========
+
+1. Preparing buffer for sorting and local memory for part of full data
+2. Sorting in groups that have size no more than (*)
+3. Sorting in global memory remaining big parts 
+4. Getting data form GPU-buffer
+
+(*) CL_DEVICE_MAX_WORK_GROUP_SIZE
+
+Installing
 =========
-* Скачать содержимое репозитория в удобную Вам папку на диске
+* Clonning this repository
 >git clone https://github.com/MarkGoncharovAl/ILab
-* Установить OpenCL. Она использовалась при написании кода. 
-Здесь может быть множество ошибок, как минимум установаите пакеты ниже
+* Install OpenCL
 >sudo apt install opencl-c-headers opencl-clhpp-headers
-* Для запуска тестов необходимо доставить Google tests
+* For testing you must have Google Tests
 >sudo apt install libgtest-dev
-* Если не установлен cmake:
+* Cmake is required
 >sudo apt install cmake
-* Сoздать и войти в папку, в которой будет собрана игра
->Открывем терминал в папке ILab/OpenCL
+* Creating installing folder
 
 >mkdir build
 
 >cd build
-* Собрать cmake проект (а именно main, e2e тесты, тесты функций tests) 
->cmake -DMAIN=ON -DE2E=ON -DTEST=ON ../
 
+* Building a project 
+>cmake ../ -DMAIN=ON -DTEST=ON -DE2E=ON
 >make
-* Запускаем проект. При запуске main обратите внимание на аргументы командной строки
-Запуск ниже подскажет, что делать. 
->./main --help
 
-Интерфейс
-=========
-Подаётся на вход количество чисел и массив. 
+Using
+=====
+1. ```./main``` calles default first finding GPU device
+2. ```./main --help ``` calles help for choosing devices
+3. ```./main --device <num>``` calles programm with chosen number of device
 
-Программа отсортирует и определит время выполнения.
+#### February 2021
