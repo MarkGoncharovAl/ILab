@@ -12,7 +12,7 @@ Annotation
 After this article:
 1. You can create your own library
 2. Understand installing cmake 
-3. Easy to use you old code
+3. Use your old code
 
 Creating
 --------
