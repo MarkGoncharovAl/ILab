@@ -1,0 +1,4 @@
+/usr/local/include/Logging.hpp
+/usr/local/include/Logging_DEFINES.hpp
+/usr/local/lib/libLogging.a
+/usr/local/lib/cmake/Logging/LoggingConfig.cmake

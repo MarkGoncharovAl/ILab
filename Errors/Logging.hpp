@@ -1,5 +1,5 @@
 #pragma once
-#include "Errors_DEFINES.hpp"
+#include "Logging_DEFINES.hpp"
 
 // level = fatal / error / warning / debug / trace
 

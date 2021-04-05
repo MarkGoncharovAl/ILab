@@ -1,4 +1,4 @@
-#include "Errors.hpp"
+#include "Logging.hpp"
 
 namespace MLib_Error
 {

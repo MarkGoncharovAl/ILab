@@ -1,0 +1,7 @@
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/install/strip.dir
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/install/local.dir
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/install.dir
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/list_install_components.dir
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/rebuild_cache.dir
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/edit_cache.dir
+/home/mark/VS_prog/ILab/Errors/build/CMakeFiles/Logging.dir

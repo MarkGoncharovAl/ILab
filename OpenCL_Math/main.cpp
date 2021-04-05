@@ -1,6 +1,6 @@
 #include <iostream>
 #include "MC_OpenCL/MC_OpenCL.hpp"
-#include "Libs/Errors/Errors.hpp"
+#include <Logging.hpp>
 #include "matrix/Matrix.h"
 #include <array>
 #include <vector>

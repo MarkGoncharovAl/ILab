@@ -9,9 +9,9 @@ find_package(OpenCL REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Logging CONFIG REQUIRED)
 
 add_subdirectory(MC_OpenCL)
-add_subdirectory(Libs/Errors)
 
 message("Building main")
 set (MAIN_EXEC main)
@@ -35,7 +35,7 @@ target_link_libraries (
     ${MAIN_EXEC}
     
     MC_OpenCL
-    Errors
+    ${LOGGING_LIBRARY_PATH}
 
     ${OpenCL_LIBRARY}
     Boost::program_options
@@ -48,7 +48,7 @@ target_link_libraries(
     ${TEST_EXEC}
 
     MC_OpenCL
-    Errors
+    ${LOGGING_LIBRARY_PATH}
 
     ${OpenCL_LIBRARY}
     Boost::program_options
