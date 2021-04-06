@@ -31,8 +31,6 @@ Algorithm
 
 NVidia code
 ===========
- Code from the article for easy reading:
-> Example 44-1. The Conjugate Gradient Solver
 > ```c
 > void clCGSolver::solveInit() 
 > {    
@@ -65,7 +63,8 @@ NVidia code
 >   R->addVector(P, P, 1, Beta);  
 >   // P = R + beta * P;    
 >   clFloat *temp; temp=NewRho;    
->   NewRho=Rho; Rho=temp;  
+>   NewRho=Rho; 
+>   Rho=temp;  
 >   // swap rho and newrho pointers  
 > }  
 > 
@@ -80,37 +79,10 @@ NVidia code
 > {    
 >   solveInit(); Rho->clone(NewRho);    
 >   for (int i = 0; i < maxI && NewRho.getData() > rhoTresh; i++)       
->       solveIteration();    return i;  
+>       solveIteration();    
+>   return i;  
 > } 
-> ```
-> 
-> The new values for y can be computed easily with our framework by applying one matrix-vector operation:
-> ````c
-> clMatrix->matrixVectorOp(CL_SUB, clCurrent, clLast, clNext);    
-> clLast->copyVector(clCurrent);        
-> // save for next iteration  
-> clCurrent->copyVector(clNext);        
-> // save for next iteration  
-> cluNext->unpack(clNext);              
-> // unpack for rendering    
-> renderHF(cluNext->m_pVectorTexture);  
-> // render as height field 
-> ````
-> 
-> The program to implicitly solve the wave equation now looks like this
-> ````c
-> cluRHS->computeRHS(cluLast, cluCurrent); 
-> // generate c(i, j, t)  
-> clRHS->repack(cluRHS);                   
-> // encode into RGBA    
-> iSteps = pCGSolver->solve(iMaxSteps);    
-> // solve using CG    
-> cluLast->copyVector(cluCurrent);         
-> // save for next iteration    
-> clNext->unpack(cluCurrent);              
-> // unpack for rendering  
-> renderHF(cluCurrent->m_pVectorTexture); 
-> ```` 
+> ``` 
 
 Installing
 =========
