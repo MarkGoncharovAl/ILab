@@ -1,26 +1,43 @@
 #include <iostream>
 #include "MC_OpenCL/MC_OpenCL.hpp"
 #include <Logging.hpp>
-#include "matrix/Matrix.h"
+#include "geometry/geometry.hpp"
 #include <array>
 #include <vector>
+#include <cmath>
 
 constexpr size_t size_boundaries = 2;
 
-static float GetAge ();
+static float GetPeriod ();
 static std::array<cl_float2 , size_boundaries> GetBoundaries ();
 static std::vector<float> GetBondCond (float age , std::array<cl_float2 , size_boundaries> const& bound);
-static matrix::Matrix<float> SolveEquation (std::vector<float> const& bondCond);
+
+static std::pair<matrix::Matrix<float> , std::vector<float>>
+PrepareEquation (std::vector<float> const& bondCond);
+
+static void PrintResult (matrix::Matrix<float> const& matr);
+static void PrintResult (clM::Vector const& vec);
 
 int main ()
 {
     try
     {
-        auto&& age = GetAge ();
+        auto&& age = GetPeriod ();
         auto&& boundaries = GetBoundaries ();
         auto&& bondCond = GetBondCond (age , boundaries);
-        auto&& answer = SolveEquation (bondCond);
-        std::cout << answer;
+        auto&& answer = PrepareEquation (bondCond);
+
+        PrintResult (answer.first.solve (answer.second).first); //CPU - Dima's matrix)
+
+        clM::Matrix<float> cl_matrix (answer.first); //diagonal fast matrix
+        clM::Vector cl_vector (std::move (answer.second)); //convenient wrapper
+        auto&& final_result = clM::Dirichle {}.Solve (cl_matrix , cl_vector);
+
+        PrintResult (final_result); //GPU
+    }
+    catch (cl::Error& err)
+    {
+        err.what ();
     }
     catch (std::exception& err)
     {
@@ -30,7 +47,51 @@ int main ()
     return 0;
 }
 
-float GetAge ()
+std::pair<matrix::Matrix<float> , std::vector<float>>
+PrepareEquation (std::vector<float> const& bondCond)
+{
+    size_t size_cond = bondCond.size ();
+    size_t size_raw = size_cond / 4 - 1;
+    size_t size_solving = std::pow (size_raw , 2);
+
+    matrix::Matrix<float> solving (size_solving , size_solving);
+    for (auto&& iter = solving.begin (); iter != solving.end (); ++iter)
+        *iter = 0;
+    std::vector<float> result (size_solving , 0);
+
+    //preparing free coeffs
+    for (size_t i = 0; i < size_raw; ++i)
+        result[i] -= bondCond[i + 1]; //up
+    for (size_t i = 0; i < size_raw; ++i)
+        result[size_raw - 1 + i * size_raw] -= bondCond[size_raw + 2 + i]; //right
+    for (size_t i = 0; i < size_raw; ++i)
+        result[i * size_raw] -= bondCond[size_cond - 1 - i]; //left
+    for (size_t i = 0; i < size_raw; ++i)
+        result[size_raw * (size_raw - 1) + i] -= bondCond[size_cond - size_raw - 2 - i]; //down
+
+    // for (auto&& elem : result)
+    //     std::cout << elem << "\n";
+
+    //preparing diag matrix
+    for (size_t i = 0; i < size_solving; ++i)
+    {
+        solving (i , i) = -4;
+        if (i > 0 && i % size_raw != 0)
+            solving (i , i - 1) = 1;
+        if (i >= size_raw)
+            solving (i , i - size_raw) = 1;
+        if (i < size_solving - 1 && i % size_raw != size_raw - 1)
+            solving (i , i + 1) = 1;
+        if (i < size_solving - size_raw)
+            solving (i , i + size_raw) = 1;
+    }
+
+    //std::cout << solving;
+
+    return std::make_pair (std::move (solving) , std::move (result));
+}
+
+float GetPeriod ()
 {
     float age = 0;
     std::cin >> age;
@@ -81,44 +142,34 @@ std::vector<float> GetBondCond (float age , std::array<cl_float2 , size_boundari
     return data;
 }
 
-matrix::Matrix<float> SolveEquation (std::vector<float> const& bondCond)
+void PrintResult (matrix::Matrix<float> const& matr)
 {
-    size_t size_cond = bondCond.size ();
-    size_t size_raw = size_cond / 4 - 1;
-    size_t size_solving = std::pow (size_raw , 2);
-
-    matrix::Matrix<float> solving (size_solving , size_solving);
-    for (auto&& iter = solving.begin (); iter != solving.end (); ++iter)
-        *iter = 0;
-    std::vector<float> result (size_solving , 0);
-
-    for (size_t i = 0; i < size_raw; ++i)
-        result[i] += bondCond[i + 1]; //up
-    for (size_t i = 0; i < size_raw; ++i)
-        result[size_raw - 1 + i * size_raw] += bondCond[size_raw + 2 + i]; //right
-    for (size_t i = 0; i < size_raw; ++i)
-        result[i * size_raw] += bondCond[size_cond - 1 - i]; //left
-    for (size_t i = 0; i < size_raw; ++i)
-        result[size_raw * (size_raw - 1) + i] += bondCond[size_cond - size_raw - 2 - i]; //down
-
-    for (size_t i = 0; i < size_solving; ++i)
+    std::cout << "CPU result:\n";
+    size_t size_raw = std::sqrt (matr.getLines ());
+    for (size_t i = 0 , j = 0; i < matr.getLines (); ++i , ++j)
     {
-        solving (i , i) = -4;
-        if (i > 0 && i % size_raw != 0)
-            solving (i , i - 1) = 1;
-        if (i > 2)
-            solving (i , i - 3) = 1;
-        if (i < size_solving - 1 && i % size_raw != size_raw - 1)
-            solving (i , i + 1) = 1;
-        if (i < size_solving - 3)
-            solving (i , i + 3) = 1;
+        if (j == size_raw)
+        {
+            std::cout << "\n";
+            j = 0;
+        }
+        std::cout << matr (i , 0) << " ";
     }
+    std::cout << "\n";
+}
 
-    std::cout << solving;
-    for (auto&& elem : result)
-        std::cout << elem << "\n";
-
-    auto&& answer = solving.solve(result);
-    std::cout << answer.first << answer.second;
-    return std::move(answer.first);
+void PrintResult (const clM::Vector& vec)
+{
+    std::cout << "GPU result:\n";
+    size_t size_raw = std::sqrt (vec.size ());
+    for (size_t i = 0 , j = 0; i < vec.size (); ++i , ++j)
+    {
+        if (j == size_raw)
+        {
+            std::cout << "\n";
+            j = 0;
+        }
+        std::cout << vec[i] << " ";
+    }
+    std::cout << "\n";
 }

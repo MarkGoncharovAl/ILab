@@ -1,47 +1,90 @@
-# Using of OpenCL - Findings patterns #
+# Using of OpenCL - Dirichle's equation #
 ### Author: Goncharov Mark (EverRest) ###
 
 ### Содержание: ###
 1. Task
 2. Algorithm
-3. Installing
-4. Using
+3. NVidia code
+4. Installing
+5. Using
 
 Task
 ====
-##### Level 2: Pattern matching
+##### Level 3: Dirichle's problem
+Formally, there is an easy way to solve using multiplications of matrixes.
+We will optimise this work in GPU
 
-1. Input is a long string (format: size, then the string).
-2. Then waiting for several strings (format: count of strings. For each string must be size and string)
+Theory:
+https://developer.nvidia.com/gpugems/gpugems2/part-vi-simulation-and-numerical-algorithms/chapter-44-gpu-framework-solving
 
-```cpp
-//Example:
-11 abracadabra
-3
-3 rac
-5 barak
-2 ab
-```
+Input you can see in folder ```TESTS```
 
-3. Output is a count of findings for each substring (numeration is started from 1)
-
-```cpp
-1 1
-2 0
-3 2
-```
-
-The main target is to accelerate searching on GPU and be faster than CPU. In several articles (like below) authors maintain that they can win about 30 times!
-
-```https://developer.nvidia.com/gpugems/gpugems3/part-v-physics-simulation/chapter-35-fast-virus-signature-matching-gpu```
+Our main target is to solve inner task Dirichle for Lapla's equation.
 
 Algorithm
 ===========
 
-1. Preparing hashes tables in GPU
-2. Copying final data to hash table of std::vector`s
-3. Cheking hash of pattern in CPU
-4. If hashes are equal, we`re cheking for pure hit
+1. Preparing matrix and free coefficients
+2. Solving in using CPU (to check results)
+3. Use Conjugate gradient method: https://en.wikipedia.org/wiki/Conjugate_gradient_method
+4. During process, we're using fast multiplications of matrixes
+
+NVidia code
+===========
+Code from the article for easy reading:
+    > Example 44-1. The Conjugate Gradient Solver
+    > ```c
+    > void clCGSolver::solveInit() 
+    > {    
+    >   Matrix->matrixVectorOp(CL_SUB, X, B, R); 
+    >   // R = A * x - b    
+    >   R->multiply(-1);  
+    >   // R = -R    
+    >   R->clone(P);  
+    >   // P = R    
+    >   R->reduceAdd(R, Rho);  
+    >   // rho = sum(R * R);    
+    > }  
+    > 
+    > void clCGSolver::solveIteration() 
+    > {    
+    >   Matrix->matrixVectorOp(CL_NULL, P, NULL,Q);  
+    >   // Q = Ap;    
+    >   P->reduceAdd(Q, Temp);  
+    >   // temp = sum(P * Q);    
+    >    Rho->div(Temp, Alpha);  
+    >   // alpha = rho/temp;      
+    >   X->addVector(P, X, 1, Alpha);  
+    >   // X = X + alpha * P    
+    >   R->subtractVector(Q, R, 1, Alpha);  
+    >   // R = R - alpha * Q    
+    >   R->reduceAdd(R, NewRho);  
+    >   // newrho = sum(R * R);    
+    >   NewRho->divZ(Rho, Beta);  
+    >   // beta = newrho/rho      
+    >   R->addVector(P, P, 1, Beta);  
+    >   // P = R + beta * P;    
+    >   clFloat *temp; temp=NewRho;    
+    >   NewRho=Rho; 
+    >   Rho=temp;  
+    >   // swap rho and newrho pointers  
+    > }  
+    > 
+    > void clCGSolver::solve(int maxI) 
+    > {    
+    >   solveInit();    
+    >   for (int i = 0; i < maxI; i++) 
+    >       solveIteration();  
+    > }      
+    > 
+    > int clCGSolver::solve(float rhoTresh, int maxI) 
+    > {    
+    >   solveInit(); 
+    >   Rho->clone(NewRho);    
+    >   for (int i = 0; i < maxI && NewRho.getData() > rhoTresh; i++)       
+    >       solveIteration();    
+    >   return i;  
+    > } 
 
 Installing
 =========

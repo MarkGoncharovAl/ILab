@@ -615,5 +615,4 @@ namespace matrix
 
 	    return result;
     }
-
 }//namespace matrix

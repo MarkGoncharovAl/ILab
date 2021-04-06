@@ -12,6 +12,7 @@ namespace clM
         public:
         Matrix (matrix::Matrix<T> const& matr);
 
+        //Creating buffers in queue that is in opencl
         std::vector<cl::Buffer> GetBuffers (OpenCL* opencl);
 
         size_t inner_size () const noexcept { return data_.front ().size (); }
@@ -21,16 +22,20 @@ namespace clM
         void dump (stream_t& stream) const;
         
         private:
+        //vector has data in diagonal's view:
+        //therefore sparse matrix are multiplying fast
         std::vector<std::vector<T>> data_;
     };
 
-    struct Helper
+    namespace Helper
     {
+        //Checking for not zero element in matrix
+        //return false if every element is zero
         template <typename T>
-        static bool CheckUpDiag (matrix::Matrix<T> const& matr , size_t num);
+        bool CheckUpDiag (matrix::Matrix<T> const& matr , size_t num);
         template <typename T>
-        static bool CheckDownDiag (matrix::Matrix<T> const& matr , size_t num);
-    };
+        bool CheckDownDiag (matrix::Matrix<T> const& matr , size_t num);
+    }
 
     ///////////////////////////////////////////
     ///////////////////////////////////////////
@@ -63,7 +68,8 @@ namespace clM
                 continue;
 
             std::vector<T> adding;
-            adding.reserve (matr_size);
+            adding.reserve (matr_size + 1);
+            adding.push_back (-1 * static_cast<float>(i)); //shifts information for kernel
 
             for (size_t j = 0; j < i; ++j)
                 adding.push_back (0); //shifting
@@ -82,7 +88,8 @@ namespace clM
                 continue;
 
             std::vector<T> adding;
-            adding.reserve (matr_size);
+            adding.reserve (matr_size + 1);
+            adding.push_back (static_cast<float>(i)); //shifts information for kernel
 
             for (size_t j = i; j < matr_size; ++j)
                 adding.push_back (matr (j , j - i)); //copying diag
@@ -102,9 +109,10 @@ namespace clM
         stream << "Dumping clM::Matrix:\n";
         for (size_t i = 0; i < data_.size (); ++i)
         {
-            stream << "[" << i << "] ";
-            for (auto&& elem : data_[i])
-                stream << elem << " ";
+            stream << "[" << i << "] [shift:";
+            stream << data_[i].front () << "] ";
+            for (auto&& iter = data_[i].begin() + 1; iter != data_[i].end(); ++iter)
+                stream << *iter << " ";
             stream << "\n";
         }
         stream << "Dump has ended\n";

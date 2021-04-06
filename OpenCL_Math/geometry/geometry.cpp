@@ -9,11 +9,10 @@ namespace clM
         : OpenCL ("../geometry/dirichle.cl")
     {}
 
-    Vector Dirichle::
-        Multiply (clM::Matrix<float>& matr , Vector& vect)
+    Vector Dirichle::Mult (clM::Matrix<float>& matr , Vector& vect)
     {
         size_t global_size = vect.size ();
-        if (matr.inner_size () != global_size)
+        if (matr.inner_size () != vect.size () + 1)
         {
             LOG_warning << "Can't multiply not equal sizes of matrix and vector!";
             return std::vector<float>{};
@@ -22,10 +21,9 @@ namespace clM
         auto&& buffers = matr.GetBuffers (this);
         auto&& vec_buf = CreateBuffer (vect);
 
-        Vector result (global_size , 0);
+        Vector result (vect.size () , 0);
         auto&& result_buffer = CreateBuffer (result);
-
-        cl::Kernel kernel (program_ , "Multiply");
+        cl::Kernel kernel (program_ , "Matrix");
 
         for (auto&& buffer : buffers)
         {
@@ -39,6 +37,52 @@ namespace clM
         return result;
     }
 
+    Vector Dirichle::Mult (float num , Vector const& vector)
+    {
+        Vector vect (vector);
+        size_t global_size = vect.size ();
+        auto&& vec_buf = CreateBuffer (vect);
+
+        cl::Kernel kernel (program_ , "VectNum");
+        kernel.setArg (0 , num);
+        kernel.setArg (1 , vec_buf);
+        RunEvent (kernel , global_size , 1);
+
+        cl::copy (queue_ , vec_buf , vect.begin () , vect.end ());
+        return vect;
+    }
+    Vector Dirichle::Sub (Vector const& lhs , Vector& rhs)
+    {
+        Vector vect (lhs);
+        size_t global_size = vect.size ();
+        auto&& vec_buf = CreateBuffer (vect);
+        auto&& rhs_buf = CreateBuffer (rhs);
+
+        cl::Kernel kernel (program_ , "Sub");
+        kernel.setArg (0 , vec_buf);
+        kernel.setArg (1 , rhs);
+        RunEvent (kernel , global_size , 1);
+
+        cl::copy (queue_ , vec_buf , vect.begin () , vect.end ());
+        return vect;
+    }
+    Vector Dirichle::Sum (Vector const& lhs , Vector & rhs)
+    {
+        Vector vect (lhs);
+        size_t global_size = vect.size ();
+        auto&& vec_buf = CreateBuffer (vect);
+        auto&& rhs_buf = CreateBuffer (rhs);
+
+        cl::Kernel kernel (program_ , "Sum");
+        kernel.setArg (0 , vec_buf);
+        kernel.setArg (1 , rhs);
+        RunEvent (kernel , global_size , 1);
+
+        cl::copy (queue_ , vec_buf , vect.begin () , vect.end ());
+        return vect;
+
+    }
+
     void Dirichle::
         RunEvent (cl::Kernel& kernel , size_t global_size , size_t local_size)
     {
@@ -47,6 +91,49 @@ namespace clM
         event.wait ();
     }
 
+    //MAIN FUNCTIONS IN ALGORITHM
+    /////////////////////////////////////////
+    Vector Dirichle::Solve (clM::Matrix<float>& matr , Vector& vect)
+    {
+        //like in wikipedia (NVidia just stole this method): 
+        //https://en.wikipedia.org/wiki/Conjugate_gradient_method
+        
+        /*
+        than smaller -> then better to answer!
+        it shows maximum norm of remaining to asnwer vector
+        */
+        constexpr float accuracy = 0.005;
+        
+        Vector x (vect.size () , 0);
+        auto&& r = vect - Mult (matr , x);
+        auto&& z = r;
+        float norm_b = vect.norm ();
+
+        while (r.norm () > accuracy)
+        {
+            // LOG_trace << "Matrix: " << matr;
+            // LOG_trace << "r: " << r;
+            // LOG_trace << "z: " << z;
+            // LOG_trace << "x: " << x;
+            SolveIteration (matr , r , z , x);
+        }
+        return x;
+    }
+
+    void Dirichle::SolveIteration (Matrix<float>& A , Vector& r , Vector& z , Vector& x)
+    {
+        auto alpha = (r * r) / (Mult (A , z) * z);
+        LOG_trace << "alpha: " << alpha;
+        x = x + Mult (alpha , z);
+        LOG_trace << "x: " << x;
+        auto new_r = r - Mult (alpha , Mult (A , z));
+        LOG_trace << "new_r: " << new_r;
+        auto betta = (r * r) / (new_r * new_r);
+        LOG_trace << "betta: " << betta;
+        z = new_r + Mult (betta , z);
+        LOG_trace << "z: " << z;
+        r = new_r;
+    }
 
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
@@ -55,6 +142,9 @@ namespace clM
     ////////////////////////////////////////////////////////////////
     //Vector
 
+    Vector::Vector (size_t size)
+        : data_ (size)
+    {}
     Vector::Vector (std::vector<float>&& data)
         : data_ (std::move (data))
     {}
@@ -66,6 +156,14 @@ namespace clM
     {
         for (auto& elem : data_)
             elem *= num;
+    }
+
+    float Vector::norm () const noexcept
+    {
+        float out = 0;
+        for (auto&& elem : data_)
+            out += elem * elem;
+        return out;
     }
     float& Vector::operator[](size_t num)
     {
@@ -115,8 +213,8 @@ namespace clM
     }
     clM::Vector Vector::operator - (Vector& that) const&
     {
-        Vector out (that);
-        out -= *this;
+        Vector out (*this);
+        out -= that;
         return out;
     }
     clM::Vector Vector::operator - (Vector& that)&&
@@ -126,7 +224,8 @@ namespace clM
     }
     clM::Vector Vector::operator - (Vector&& that) const
     {
-        that += *this;
+        that -= *this;
+        that.multiply (-1);
         return that;
     }
 
@@ -139,13 +238,21 @@ namespace clM
     }
 }
 
-clM::Vector& operator * (float num , clM::Vector& vector)
+clM::Vector operator * (float num , const clM::Vector& vector)
 {
-    vector.multiply (num);
-    return vector;
+    clM::Vector out = vector;
+    out.multiply (num);
+    return out;
 }
-clM::Vector& operator * (clM::Vector& vector , float num)
+clM::Vector operator * (const clM::Vector& vector , float num)
 {
-    vector.multiply (num);
-    return vector;
+    clM::Vector out = vector;
+    out.multiply (num);
+    return out;
+}
+
+std::ostream& operator << (std::ostream& stream , clM::Vector const& vector)
+{
+    vector.dump<std::ostream> (stream);
+    return stream;
 }

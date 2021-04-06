@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(Math)
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
 find_package(OpenCL REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
@@ -12,6 +8,7 @@ find_package(GTest REQUIRED)
 find_package(Logging CONFIG REQUIRED)
 
 add_subdirectory(MC_OpenCL)
+add_subdirectory(Libs/Random)
 
 message("Building main")
 set (MAIN_EXEC main)
@@ -28,6 +25,7 @@ set (TARGETS
 
 foreach (TNAME ${TARGETS})
     target_compile_features(${TNAME} PRIVATE cxx_std_20)
+    target_compile_options(${TNAME} PRIVATE -O3)
 endforeach()
 
 message("Targeting main")
@@ -49,6 +47,7 @@ target_link_libraries(
 
     MC_OpenCL
     ${LOGGING_LIBRARY_PATH}
+    Random
 
     ${OpenCL_LIBRARY}
     Boost::program_options
