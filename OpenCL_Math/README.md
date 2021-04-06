@@ -32,7 +32,9 @@ Algorithm
 NVidia code
 ===========
 Code from the article for easy reading:
+
     > Example 44-1. The Conjugate Gradient Solver
+
     > ```c
     > void clCGSolver::solveInit() 
     > {    
@@ -85,6 +87,7 @@ Code from the article for easy reading:
     >       solveIteration();    
     >   return i;  
     > } 
+    ```
 
 Installing
 =========
