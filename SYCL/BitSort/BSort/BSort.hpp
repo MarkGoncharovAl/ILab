@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../../MySycl/MySycl.hpp"
+#include "../MySycl/MySycl.hpp"
 
 namespace Msycl
 {
