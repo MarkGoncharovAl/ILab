@@ -1,0 +1,4 @@
+
+FATAL File[__Examples1.cpp] Line[__11] fatal_message
+ERROR File[__Examples1.cpp] Line[__12] error_message
+WARN  File[__Examples1.cpp] Line[__13] warning_message
