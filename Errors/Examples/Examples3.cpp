@@ -1,4 +1,4 @@
-#include "../Errors.hpp"
+#include <Logging.hpp>
 #include <iostream>
 
 //Compiling with flag -D LOG_FILE -D TRACE

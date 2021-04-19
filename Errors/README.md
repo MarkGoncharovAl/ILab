@@ -2,23 +2,28 @@
 ## Author: MarkGoncharovAl ##
 
 ### Description ###
-1. Compiling
-2. Flags
-3. Functions
+1. Install
+2. Using
+3. Flags
+4. Functions
 
 ### Install ###
 1. Clone this folder
-2. Using gcc compile: 
-```gcc "files.c" Errors/Errors.cpp -o "output.o"```
-3. Using CMake: after compiling "output.o" paste:
-	* ```add_subdirectory(Errors)```
-	* ```target_link_libraries("output.o" Errors)```
+2. Write ```make``` in order to install packet on your computer
+
+### Using ###
+1. Use in your program as others libraries
+	* ```#include <Logging>```
+2. Compiling using terminal. Example: ```g++ main.cpp -lLogging```
+	* ```[Your compiler] [Your files.cpp] -lLogging```
+
+3. Or compile using CMake:
+	* ```find_package (Logging CONFIG REQUIRED)```
+	* ```target_link_libraries (${Final Binary} PRIVATE ${Your other libraries} Logging)```
 
 ### Flags ###
 The simplest understanding is looking at Examples! 
-There're few convenient features that you can use
-
-##### Compiling flags: #####
+There're few convenient features that you can use:
 
 * ```ERROR``` - priting fatal + errors
 
@@ -45,3 +50,5 @@ You can use it in namespace LOG
 3. ```LOG::SetSize_NameLine``` - reset size of string that used for LINE name.
 
 ### I hope this will help you with debugging! ###
+
+#### March 2021
