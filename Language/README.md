@@ -1,26 +1,12 @@
 # ParaCL #
 
-### 23.11.20 attempt ###
+### Author: Goncharov Mark
 
-##### Files #####
+There's the simplest programming language ParaCL. 
+You can check examples at folder "Tests"
 
-Lexer - лексический анализ
+In project was used ```Bison + Flex``` and soon will be
+```LLVM``` backend. It's creating at folder "../LLVM"
 
-Grammar - грамматика, синтаксическое дерево
-
-Node - вся информация о вершинах, symtab -- хэш-таблица с данными о именах
-
-Tests - начал только писать тесты, запускать их как
-	bash make
-
-##### Компиляция ##### 
-
-mkdir build
-
-cmake ..
-
-make
-
-cd ../Tests
-
-bash make
+Projecting scheme:
+![scheme.png](scheme.png)
