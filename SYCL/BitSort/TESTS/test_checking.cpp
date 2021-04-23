@@ -41,7 +41,7 @@ int main()
 
         try
         {
-            Msycl::BSort{}.sort(data);
+            Msycl::sort(data);
             CompareData(data, data_check);
         }
         catch (cl::sycl::exception &err)

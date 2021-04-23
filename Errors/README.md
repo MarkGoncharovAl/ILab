@@ -1,6 +1,9 @@
 # Logging in C++ #
 ## Author: MarkGoncharovAl ##
 
+If you want to use logging functional without installing -> copy ```Logging``` folder 
+to your project folder. Then apply ```add_subdirectory(Logging)``` and ```target_link_libraries(Logging_lib)```
+
 ### Description ###
 1. Install
 2. Using

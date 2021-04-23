@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Logging.hpp>
+#include "Libs/Logging/Logging.hpp"
 #include "geometry/geometry.hpp"
 #include <array>
 #include <vector>
@@ -121,7 +121,9 @@ std::array<cl_float2 , size_boundaries> GetBoundaries ()
 
 std::vector<float> GetBondCond (float age , std::array<cl_float2 , size_boundaries> const& bound)
 {
-    size_t size = 2 * static_cast<size_t>((std::fabs (bound[1].s[0] - bound[0].s[0]) + std::fabs (bound[1].s[1] - bound[0].s[1])) / age);
+    float full_size = std::fabs (bound[1].s[0] - bound[0].s[0]) + std::fabs (bound[1].s[1] - bound[0].s[1]);
+    size_t size = 2 * static_cast<size_t>(full_size / age);
+    
     std::vector<float> data;
     data.reserve (size);
 

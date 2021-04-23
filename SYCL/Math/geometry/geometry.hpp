@@ -8,9 +8,9 @@ namespace Msycl
     public:
         using value_type = float;
 
-        Vector (size_t size);
-        Vector (size_t num , float default_val);
-        Vector (std::vector<float>&& data);
+        Vector (size_t size) : data_ (size) {}
+        Vector (std::vector<float>&& data) : data_ (std::move (data)) {}
+        Vector (size_t num , float default_val) : data_ (num , default_val) {}
         Vector (const Vector& that) = default;
         Vector (Vector&& that) = default;
         Vector& operator=(const Vector& that) = default;
@@ -40,8 +40,8 @@ namespace Msycl
 
         float operator * (Vector const& that);
 
-        float& operator[](size_t num);
-        float operator[](size_t num) const;
+        float& operator[](size_t num) { return data_[num]; }
+        float operator[](size_t num) const { return data_[num]; }
 
         auto begin () noexcept { return data_.begin (); }
         auto end () noexcept { return data_.end (); }
@@ -57,7 +57,7 @@ namespace Msycl
     {
     public:
 
-        Dirichle ();
+        Dirichle () = default;
 
         //GPU power - but it's slower than CPU except matrix * vector...
         //Therefore I'm using only Mult in both cases

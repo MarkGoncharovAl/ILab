@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../MySycl/MySycl.hpp"
-#include <Logging.hpp>
+#include "../Libs/Logging/Logging.hpp"
 #include "../matrix/Matrix.h"
 #include <fstream>
 
@@ -112,7 +112,7 @@ namespace Msycl
         buffers_.reserve (data_.size ());
 
         for (auto&& container : data_)
-            buffers_.push_back (std::move (CreateLinBuf (container)));
+            buffers_.push_back (std::move (CreateLinBuf (container.begin(), container.end())));
     }
 
     template <typename T>

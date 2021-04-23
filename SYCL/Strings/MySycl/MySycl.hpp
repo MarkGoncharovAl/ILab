@@ -5,29 +5,40 @@ namespace Msycl
 {
     namespace cls = cl::sycl;
 
+    //concept is used for checking for data continuity - for buffer
+    template <typename Iter>
+    concept IterBuf =
+        std::is_same <typename std::iterator_traits<Iter>::iterator_category ,
+        std::random_access_iterator_tag>::value;
+
     class MySycl
     {
     public:
-        MySycl();
-        virtual ~MySycl() {}
+        MySycl ()
+            : queue_ (cls::default_selector {})
+        {}
+        virtual ~MySycl () {}
 
-        cls::string_class GetDevicName () const;
+        cls::string_class GetDevicName () const
+        {
+            return queue_.get_device ().get_info<cls::info::device::name> ();
+        }
 
         template <class T>
-        auto submit(T&& elem) {return queue_.submit(std::forward<T>(elem));}
+        auto submit (T&& elem) { queue_.submit (std::forward<T> (elem)); }
 
     private:
         cls::queue queue_;
     };
 
-    /*must has:
-    1) typename value_type
-    2) data()
-    3) size()
-    */
-    template <class Container>
-    auto CreateLinBuf(Container& cont) -> cls::buffer<typename Container::value_type, 1>
+    template <typename Iter>
+    using IterVal = typename std::iterator_traits<Iter>::value_type;
+    
+    template <IterBuf Iter>
+    cls::buffer<IterVal<Iter> , 1>
+        CreateLinBuf (Iter begin , Iter end)
     {
-        return cls::buffer<typename Container::value_type, 1>(cont.data(), cls::range<1>(cont.size()));
+        cls::range<1> range (std::distance (begin , end));
+        return cls::buffer<IterVal<Iter> , 1> (&(*begin) , std::move (range));
     }
 }

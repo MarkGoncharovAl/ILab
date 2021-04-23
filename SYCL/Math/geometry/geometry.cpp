@@ -2,12 +2,7 @@
 
 namespace Msycl
 {
-
-    Dirichle::Dirichle ()
-        : MySycl ()
-    {}
-
-    class LAMBDA_NAME1;
+    class MatrixVector;
     Vector Dirichle::Mult (Msycl::Matrix<float>& matr , Vector& vect)
     {
         size_t global_size = vect.size ();
@@ -18,10 +13,10 @@ namespace Msycl
         }
 
         auto&& buffers = matr.GetBuffers ();
-        auto&& vec_buf = CreateLinBuf (vect);
+        auto&& vec_buf = CreateLinBuf (vect.begin(), vect.end());
 
         Vector result (vect.size () , 0);
-        auto&& result_buffer = CreateLinBuf (result);
+        auto&& result_buffer = CreateLinBuf (result.begin(), result.end());
 
         for (auto&& buffer : buffers)
         {
@@ -30,7 +25,7 @@ namespace Msycl
                 auto&& vec_buf_a = vec_buf.get_access<cls::access_mode::read> (cgh);
                 auto&& result_buffer_a = result_buffer.get_access<cls::access_mode::read_write> (cgh);
 
-                cgh.parallel_for<class LAMBDA_NAME1> (cls::range<1>{global_size} , [=](cls::id<1> id) {
+                cgh.parallel_for<class MatrixVector> (cls::range<1>{global_size} , [=](cls::id<1> id) {
                     const int i = id[0];
                     const float cur_buf0 = buffer_a[0];
                     float cur_buffer = buffer_a[i + 1];
@@ -46,17 +41,17 @@ namespace Msycl
         return result;
     }
 
-    class LAMBDA_NAME2;
+    class MultVectorNum;
     Vector Dirichle::Mult (float num , Vector const& vector)
     {
         Vector vect (vector);
         size_t global_size = vect.size ();
-        auto&& vec_buf = CreateLinBuf (vect);
+        auto&& vec_buf = CreateLinBuf (vect.begin(), vect.end());
 
         submit ([&](cls::handler& cgh) {
             auto&& buffer_a = vec_buf.get_access<cls::access_mode::read_write> (cgh);
 
-            cgh.parallel_for<class LAMBDA_NAME2> (cls::range<1>{global_size} , [=](cls::id<1> id) {
+            cgh.parallel_for<class MultVectorNum> (cls::range<1>{global_size} , [=](cls::id<1> id) {
                 const int i = id[0];
                 buffer_a[i] *= num;
             });
@@ -64,37 +59,6 @@ namespace Msycl
 
         return vect;
     }
-    // Vector Dirichle::Sub (Vector const& lhs , Vector& rhs)
-    // {
-    //     Vector vect (lhs);
-    //     size_t global_size = vect.size ();
-    //     auto&& vec_buf = CreateBuffer (vect);
-    //     auto&& rhs_buf = CreateBuffer (rhs);
-
-    //     cl::Kernel kernel (program_ , "Sub");
-    //     kernel.setArg (0 , vec_buf);
-    //     kernel.setArg (1 , rhs);
-    //     RunEvent (kernel , global_size , 1);
-
-    //     cl::copy (queue_ , vec_buf , vect.begin () , vect.end ());
-    //     return vect;
-    // }
-    // Vector Dirichle::Sum (Vector const& lhs , Vector& rhs)
-    // {
-    //     Vector vect (lhs);
-    //     size_t global_size = vect.size ();
-    //     auto&& vec_buf = CreateBuffer (vect);
-    //     auto&& rhs_buf = CreateBuffer (rhs);
-
-    //     cl::Kernel kernel (program_ , "Sum");
-    //     kernel.setArg (0 , vec_buf);
-    //     kernel.setArg (1 , rhs);
-    //     RunEvent (kernel , global_size , 1);
-
-    //     cl::copy (queue_ , vec_buf , vect.begin () , vect.end ());
-    //     return vect;
-
-    // }
 
     //MAIN FUNCTIONS IN ALGORITHM
     /////////////////////////////////////////
@@ -116,10 +80,10 @@ namespace Msycl
 
         while (r.norm () > accuracy)
         {
-            // LOG_trace << "Matrix: " << matr;
-            // LOG_trace << "r: " << r;
-            // LOG_trace << "z: " << z;
-            // LOG_trace << "x: " << x;
+            LOG_trace << "Matrix: " << matr;
+            LOG_trace << "r: " << r;
+            LOG_trace << "z: " << z;
+            LOG_trace << "x: " << x;
             SolveIteration (matr , r , z , x);
         }
         return x;
@@ -147,16 +111,6 @@ namespace Msycl
     ////////////////////////////////////////////////////////////////
     //Vector
 
-    Vector::Vector (size_t size)
-        : data_ (size)
-    {}
-    Vector::Vector (std::vector<float>&& data)
-        : data_ (std::move (data))
-    {}
-    Vector::Vector (size_t num , float default_val)
-        : data_ (num , default_val)
-    {}
-
     void Vector::multiply (float num)
     {
         for (auto& elem : data_)
@@ -169,14 +123,6 @@ namespace Msycl
         for (auto&& elem : data_)
             out += elem * elem;
         return out;
-    }
-    float& Vector::operator[](size_t num)
-    {
-        return data_[num];
-    }
-    float Vector::operator[](size_t num) const
-    {
-        return data_[num];
     }
 
     void Vector::operator += (Vector const& that)

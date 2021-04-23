@@ -9,7 +9,7 @@
 
 namespace MLib_Error
 {
-    enum class Logging_Level { trace, debug , warning , error , fatal };
+    enum class Logging_Level { trace = 0 , debug , warning , error , fatal };
     constexpr size_t Logging_Level_Size = 5;
 }
 using lvl = MLib_Error::Logging_Level;
@@ -59,6 +59,12 @@ namespace MLib_Error
         void PrintFileLine (const std::string& file , size_t line);
     };
 
+
+    //Nothing will be printed
+    struct Log_stream_Fake {};
+
+
+    static Log_stream_Fake FAKE_LOGGING;
     static MLib_Error::Logging MAIN_LOG_OBJ;
 }
 
@@ -66,6 +72,11 @@ template<class T>
 MLib_Error::Log_stream& operator<<(MLib_Error::Log_stream& log , const T& value)
 {
     log.Print (value);
+    return log;
+}
+template<class T>
+MLib_Error::Log_stream_Fake& operator<<(MLib_Error::Log_stream_Fake& log , const T& value)
+{
     return log;
 }
 

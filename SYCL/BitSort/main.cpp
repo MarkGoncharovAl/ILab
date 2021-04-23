@@ -14,7 +14,7 @@ int main (int argc , char* argv [])
     auto&& data = ReadData ();
     try
     {
-        Msycl::BSort {}.sort (data , Msycl::BSort::Sort::Decr);
+        Msycl::sort (data.begin(), data.end());
         WriteData (data);
     }
     catch (cl::sycl::exception& err)

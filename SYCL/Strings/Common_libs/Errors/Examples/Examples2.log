@@ -1,6 +1,0 @@
-
-FATAL File[__Examples2.cpp] Line[__11] fatal_message
-ERROR File[__Examples2.cpp] Line[__12] error_message
-WARN  File[__Examples2.cpp] Line[__13] warning_message
-debug File[__Examples2.cpp] Line[__14] debug_message
-trace File[__Examples2.cpp] Line[__15] trace_message

@@ -24,7 +24,4 @@ Installing
     1. export PATH=$DPCPP_HOME/llvm/build/bin:$PATH
     2. export LD_LIBRARY_PATH=$DPCPP_HOME/llvm/build/lib:$LD_LIBRARY_PATH
 
-In my case only ```set PATH /home/mark/TRASH/DPC/llvm/build/bin/ /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/games /usr/local/games```,
-because I work using fish-shell.
-
 #### March 2021

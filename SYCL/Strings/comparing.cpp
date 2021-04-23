@@ -106,7 +106,10 @@ std::string ReadBase (std::ifstream& file)
 
     file >> count;
     if (!file.good ())
-        throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
+    {
+        LOG_error << "Can't read count!"; //there I will find line and file
+        throw std::runtime_error ("Can't proprly read count!");
+    }
 
     out.reserve (count);
     for (size_t i = 0; i < count; ++i)
@@ -116,7 +119,10 @@ std::string ReadBase (std::ifstream& file)
         out.push_back (elem);
     }
     if (!file.good ())
-        throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
+    {
+        LOG_error << "Can't read elements!"; //there I will find line and file
+        throw std::runtime_error ("Can't proprly read!");
+    }
 
     return out;
 }
@@ -128,7 +134,11 @@ std::vector<std::string> ReadPatterns (std::ifstream& file)
 
     file >> count;
     if (!file.good ())
-        throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
+    {
+        LOG_error << "Can't read count!"; //there I will find line and file
+        throw std::runtime_error ("Can't proprly read!");
+    }
+    
     output.reserve (count);
 
     for (size_t i = 0; i < count; ++i)
@@ -138,13 +148,13 @@ std::vector<std::string> ReadPatterns (std::ifstream& file)
 
         file >> size;
         if (!file.good ())
-            throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
+        {
+            LOG_error << "Can't read elements!"; //there I will find line and file
+            throw std::runtime_error ("Can't proprly read!");
+        }
 
         out.reserve (size);
         file >> out;
-        // if (!file.good ())
-            // throw std::runtime_error ("Can't proprly read! " + std::string (__FILE__) + std::to_string (__LINE__));
-
         output.push_back (std::move (out));
     }
 

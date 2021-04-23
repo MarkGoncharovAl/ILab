@@ -5,7 +5,7 @@
 Msycl::RabKar::RabKar (std::string& base) :
     MySycl () ,
     Hash_RabKar () ,
-    buffer_base_ (std::move (CreateLinBuf (base))) ,
+    buffer_base_ (std::move (CreateLinBuf (base.begin(), base.end()))) ,
     base_ (base)
 {}
 
@@ -85,11 +85,11 @@ Msycl::RabKar::PrepareHashOfBuffer (std::vector<std::string>& patterns)
     return hashes;
 }
 
-class LAMBDA_NAME;
+class GettingHashesInTable;
 void Msycl::RabKar::GetVecHashes (size_t pattern_size , size_t global_size , std::vector<hash_type>& hash_buffer)
 {
     //creating buffers for output hashes
-    auto&& cur_buffer = CreateLinBuf (hash_buffer);
+    auto&& cur_buffer = CreateLinBuf (hash_buffer.begin(), hash_buffer.end());
 
     MLib::Time time;
     submit ([&](cls::handler& cgh) {
@@ -98,7 +98,7 @@ void Msycl::RabKar::GetVecHashes (size_t pattern_size , size_t global_size , std
         auto&& cur_buffer_a = cur_buffer.get_access<cls::access_mode::read_write> (cgh);
         auto&& buffer_base_a = buffer_base_.get_access<cls::access_mode::read> (cgh);
 
-        cgh.parallel_for<class LAMBDA_NAME> (cls::range<1>{global_size} , [=](cls::id<1> i) {
+        cgh.parallel_for<class GettingHashesInTable> (cls::range<1>{global_size} , [=](cls::id<1> i) {
             const int id = i[0];
             ulong hash = 1;
             ulong last_iter = id + pattern_size;
