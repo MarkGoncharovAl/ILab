@@ -39,6 +39,9 @@ namespace Msycl
         CreateLinBuf (Iter begin , Iter end)
     {
         cls::range<1> range (std::distance (begin , end));
+
+        //Yes, I have to get pointer to begin of data
+        //I just have to be confident in random_access_iterator
         return cls::buffer<IterVal<Iter> , 1> (&(*begin) , std::move (range));
     }
 }
