@@ -3,7 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "Common_libs/Time.hpp"
 #include "Common_libs/Table.hpp"
@@ -16,7 +16,7 @@ using CUR_TABLE = MLib::Table_h<double , 6>;
 static std::string ReadBase (std::ifstream& file);
 static std::vector<std::string> ReadPatterns (std::ifstream& file);
 static std::vector<std::ifstream> OpenFilesIn (const std::string& folder);
-static bool IsExtensionTxt (const boost::filesystem::path& path);
+static bool IsExtensionTxt (const std::filesystem::path& path);
 static CUR_TABLE PrepareTable ();
 static void AddToTable (CUR_TABLE& table , const Msycl::RabKar& alg , double native , double rabkar);
 
@@ -77,19 +77,19 @@ std::vector<std::ifstream> OpenFilesIn (const std::string& folder_name)
 {
     std::vector<std::ifstream> out;
 
-    namespace bfs = boost::filesystem;
-    bfs::path folder { folder_name };
-    if (!bfs::exists (folder))
+    namespace stdfs = std::filesystem;
+    stdfs::path folder { folder_name };
+    if (!stdfs::exists (folder))
     {
         LOG_warning << "Can't find folder " << folder_name;
         return out;
     }
 
     //folder exists
-    bfs::directory_iterator iter (folder) , end;
+    stdfs::directory_iterator iter (folder) , end;
     for (; iter != end; ++iter)
     {
-        if (bfs::is_regular_file (*iter)
+        if (stdfs::is_regular_file (*iter)
         && IsExtensionTxt (iter->path ()))
         {
             out.push_back (std::ifstream { iter->path ().string () });
@@ -163,9 +163,9 @@ std::vector<std::string> ReadPatterns (std::ifstream& file)
     return output;
 }
 
-bool IsExtensionTxt (const boost::filesystem::path& path)
+bool IsExtensionTxt (const std::filesystem::path& path)
 {
-    return (boost::filesystem::extension (path) == ".txt");
+    return (path.extension() == ".txt");
 }
 
 CUR_TABLE PrepareTable ()

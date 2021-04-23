@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "Common_libs/Random.hpp"
-#include "Common_libs/Errors/Errors.hpp"
+#include "Common_libs/Logging/Logging.hpp"
 #include <array>
 
 int main ()

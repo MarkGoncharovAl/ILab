@@ -17,6 +17,7 @@ namespace Msycl
 
     //sorting iterator must be forward type. Now <concept> isn't on my computer
     //therefore i had to create bycicle (concept std::forward_iterator isn't allowed now...(((
+    //and i don't have std::base_of and so on. Of course, I can rewrite it... but I just can wait for several months
     template<typename Iter>
     concept IterSort =
         std::is_same_v<typename std::iterator_traits<Iter>::iterator_category , std::forward_iterator_tag>
@@ -26,8 +27,8 @@ namespace Msycl
 
     /* USED NAMES
     IterBuf - random_access_iterator
-    IterSort - forward_iterator
-    IterVal - iterator's value (through std::iterator_traits)
+    IterSort - at least forward_iterator
+    IterVal - iterator's value (typename std::iterator_traits<Iter>::value_type)
     */
 
     class BSort : private MySycl
@@ -151,6 +152,7 @@ namespace Msycl
         else
             pushing_num = std::numeric_limits<T>::min ();
 
+        //resize includes filling new storage with `pushing_num`
         data.resize (new_size, pushing_num);
         return old_size;
     }

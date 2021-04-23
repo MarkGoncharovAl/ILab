@@ -8,8 +8,8 @@ namespace Msycl
     //concept is used for checking for data continuity - for buffer
     template <typename Iter>
     concept IterBuf =
-        std::is_same <typename std::iterator_traits<Iter>::iterator_category ,
-        std::random_access_iterator_tag>::value;
+        std::is_same_v <typename std::iterator_traits<Iter>::iterator_category ,
+        std::random_access_iterator_tag>;
 
     class MySycl
     {
@@ -39,6 +39,9 @@ namespace Msycl
         CreateLinBuf (Iter begin , Iter end)
     {
         cls::range<1> range (std::distance (begin , end));
+
+        //Yes, I have to get pointer to begin of data
+        //I just have to be confident in random_access_iterator
         return cls::buffer<IterVal<Iter> , 1> (&(*begin) , std::move (range));
     }
 }

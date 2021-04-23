@@ -7,9 +7,7 @@ set(CMAKE_CXX_FLAGS "-fsycl")
 
 project(Strings)
 
-find_package(Logging CONFIG REQUIRED)
-find_package(Boost COMPONENTS system filesystem REQUIRED)
-
+add_subdirectory(Common_libs/Logging)
 add_subdirectory(NativeAlg)
 add_subdirectory(RabKar)
 
@@ -33,12 +31,11 @@ endforeach()
 target_link_libraries  (
     ${MAIN_EXEC} PRIVATE 
     NativeAlg RabKar
-    Logging
+    Logging_lib
 )
 
 target_link_libraries  (
     ${TEST_EXEC} PRIVATE 
     NativeAlg RabKar
-    Logging 
-    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+    Logging_lib
 )

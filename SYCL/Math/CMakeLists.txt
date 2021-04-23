@@ -8,7 +8,6 @@ set(CMAKE_CXX_FLAGS "-fsycl")
 project(Math)
 add_subdirectory(geometry)
 add_subdirectory(Libs/Logging)
-find_package(Logging CONFIG REQUIRED)
 
 set(BIN main)
 
