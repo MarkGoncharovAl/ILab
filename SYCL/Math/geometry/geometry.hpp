@@ -71,14 +71,6 @@ namespace Msycl
         2) the main time is getting elements from memory
         */
 
-        /*
-        we can't do rhs 'const' in order to get 'data()'
-        during creating a buffer
-        */
-        // Vector Sub (Vector const& lhs , Vector& rhs); //rhs = const
-        // Vector Sum (Vector const& lhs , Vector& rhs); //rhs = const
-        ////////////////////////////
-
         //Main function in algorithm
         Vector Solve (Matrix<float>& matr , Vector& vect);
 
