@@ -34,5 +34,5 @@ Final progress
 | Set      | 1.5   | 9    |
 | Matrix   | 1.6   | 9    |
 | Language | 1     | 9    |
-| OpenCL   | 3.5   | 9    |
+| OpenCL   | 4.2   | 9    |
 | Graph    | 1.3   | 9    |
